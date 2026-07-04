@@ -1,0 +1,24 @@
+{
+  "name": "oracle-review",
+  "version": "0.1.0+codex.20260624075636",
+  "description": "Heavy-use Oracle MCP second-opinion workflow for reviews, repeated blockers, evaluation, planning, and current-information research.",
+  "author": {
+    "name": "Yukito Nonaka"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Oracle Review",
+    "shortDescription": "Use Oracle for reviews, blockers, planning, and research",
+    "longDescription": "Use Oracle Review heavily when GPT-5.5 Pro should provide a second opinion for reviews, repeated errors, evaluation, planning, or latest-information research. The setup is covered by a fixed subscription, so repeated use has no additional per-run cost. Always fetch and carefully digest the result before finalizing, but do not trust it blindly. If the result looks wrong, first suspect missing context or poor framing and ask again with better files, background, or question wording.",
+    "developerName": "Yukito Nonaka",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Use Oracle Review for this blocker"
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}

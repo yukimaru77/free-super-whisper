@@ -1,0 +1,18 @@
+=== AGENT_SMOKE_START claude-2 2026-06-24T02:41:27+0900 ===
+root=/Users/nonaka/tasks/oracle-setup/oracle-agent-smoke
+prompt=/Users/nonaka/tasks/oracle-setup/oracle-agent-smoke/prompts/claude-2.md
+log=/Users/nonaka/tasks/oracle-setup/oracle-agent-smoke/logs/claude-2.log
+oracle=/Users/nonaka/.local/bin/oracle
+0.15.0
+AGENT_SMOKE_DONE claude-2
+
+- Oracle session: `claude-smoke-implementa-plan-2`
+- Zipped attachment bundling: yes — Oracle packed 5 files into 1 ZIP bundle.
+- Oracle result summary:
+  - Found `src/cart.js` coupon logic is broken: `SAVE10` assignment makes unknown truthy coupons discounted and prevents `FREESHIP` from working correctly.
+  - Recommended defining a single cart-total contract, making `applyDiscount` pure, and adding tests for missing, unknown, `SAVE10`, and `FREESHIP` coupons.
+  - Flagged scheduler drift in `next_run`; recommended arithmetic catch-up anchored to `last_run`, plus invalid interval validation.
+  - Noted `normalizeSku(null)` should match tests by returning `""`, with explicit behavior for other non-string inputs.
+  - Recommended hardening digest eligibility with safe `.get()` access, strict `enabled is True`, nonblank string emails, malformed-record skipping, and tests.
+  - Suggested CI/test setup improvements so JS and Python suites run reproducibly from a clean checkout.
+=== AGENT_SMOKE_EXIT claude-2 code=0 2026-06-24T02:47:19+0900 ===

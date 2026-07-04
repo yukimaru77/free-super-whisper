@@ -1,0 +1,13 @@
+AGENT_SMOKE_DONE codex-2
+
+Oracle session: `codex-smoke-scheduler-bughunt`  
+Zipped attachment bundling: yes, 3 files packed into 1 zip bundle.
+
+Oracle’s actual answer summary:
+
+- `next_run` postpones overdue jobs to `now + interval` instead of catching up or preserving cadence.
+- `interval_minutes` lacks validation, allowing zero, negative, float, and boolean values.
+- `last_run=None` bypasses validation and can return `None` despite an apparent datetime contract.
+- Timezone handling and future `last_run` behavior are unspecified, creating edge-case scheduling risks.
+- `should_send_digest` uses truthiness for `enabled` and accepts bad email values like empty strings or non-strings.
+- Test/package setup is fragile: `pytest -q` failed import collection, while `python -m pytest -q` ran with 1 failure and 1 pass.

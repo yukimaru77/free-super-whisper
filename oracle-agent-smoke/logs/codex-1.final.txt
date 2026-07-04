@@ -1,0 +1,14 @@
+AGENT_SMOKE_DONE codex-1
+
+Oracle session slug: `codex-smoke-cart-review`  
+Zipped attachment bundling: yes, Oracle packed 3 files into one ZIP bundle.  
+Model verification: Oracle resolved and verified `Pro Extended`.
+
+Oracle’s answer summary:
+
+- Found a critical bug in `src/cart.js`: `if (code = "SAVE10")` assigns instead of compares, so every truthy coupon acts like `SAVE10`.
+- `normalizeSku(null)` and `normalizeSku(undefined)` throw, contradicting the expected null-safe behavior in tests.
+- Shipping behavior is inconsistent across coupon paths; some branches omit shipping while others include it.
+- `FREESHIP` mutates `cart.shipping`, which can affect later calls using the same cart.
+- Flagged missing validation/rounding for monetary inputs, including strings, `NaN`, negatives, infinities, and fractional cents.
+- Noted test gaps around coupon behavior, SKU normalization, empty/multi-item carts, mutation, rounding, and reproducible test runner config.

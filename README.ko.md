@@ -1,0 +1,66 @@
+# free-super-whisper
+
+[English](README.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md) | **한국어**
+
+<p align="center">
+  <img src="docs/logo.png" alt="free-super-whisper" width="340">
+</p>
+
+
+macOS용 음성 입력 도구입니다. 단축키를 누르고 말한 뒤 다시 누르면, 다듬어진 문장이 커서 위치에 붙여넣어집니다. 전사와 다듬기는 백그라운드 Chrome 탭에서 본인의 ChatGPT(웹)를 자동 조작하여 수행하므로 API 키도, 추가 비용도 필요 없습니다.
+
+## 특징
+
+- **어떤 앱에서든 동작** — 텍스트를 입력할 수 있는 곳이라면 어디서든. `Ctrl+Z`로 녹음 시작, 다시 누르면 결과가 붙여넣어집니다. 작업 중인 창에서 포커스를 빼앗지 않습니다.
+- **전사가 아니라 다듬기** — 군말·머뭇거림·말 고침을 제거하고, 명백한 오인식만 수정합니다. 의미·어조·문체는 바꾸지 않습니다. 입력과 같은 언어로 출력되므로 어떤 언어든 사용할 수 있습니다.
+- **목소리로 키우는 개인 사전** — 자꾸 잘못 인식되는 말이 있으면 `Ctrl+Shift+Z`를 누르고 "『orakuru』는 소문자 영어 oracle로 써 줘"처럼 말하세요. `오인식(읽기) → 정답` 형태(예: `山田太郎(yamada tarou) → 山田汰楼`)로 사전에 등록되고(macOS 알림), 이후 모든 음성 입력에 반영됩니다. 읽기를 함께 저장하므로 **같은 소리의 다른 표기**도 수정됩니다. 등록은 백그라운드에서 진행되어 그동안에도 계속 음성 입력을 쓸 수 있습니다.
+- **흔적을 남기지 않음** — 처리에 사용한 ChatGPT 대화는 매번 자동으로 보관(아카이브)되어 기록에 남지 않습니다.
+
+## 동작 원리
+
+DevTools 프로토콜로 백그라운드 Chrome 탭을 조작합니다: ChatGPT의 받아쓰기 버튼으로 전사 → 전용 프로젝트에서 다듬기 → 답변을 복사해 원래 앱에 붙여넣기. 첫 실행 시 ChatGPT에 프로젝트 두 개가 자동 생성됩니다.
+
+![아키텍처](docs/architecture.ko.png)
+
+| 프로젝트 | 역할 | 모델 |
+|---|---|---|
+| Transcript Normalizer | 다듬기 | 가장 가벼움(즉시) |
+| Whisper Dictionary | 사전 항목 추출 | 중간(중간) |
+
+## 설치
+
+```bash
+./install.sh
+```
+
+과정:
+
+1. **단축키 선택** — 음성 입력(기본 `Ctrl+Z`)과 사전 등록(기본 `Ctrl+Shift+Z`). skhd 문법으로 자유롭게 바꿀 수 있고 입력은 검증됩니다. 자주 쓰이는 조합(Cmd+C 등)을 고르면 경고가 나옵니다.
+2. **설치를 맡길 AI 에이전트 선택** — Claude Code / Codex / opencode. 에이전트가 결정론적 스크립트 `install-core.sh`(사전 요건 확인 → 의존성 설치 → ChatGPT 로그인 → 단축키 등록 → 권한 안내)를 실행하고, **중간에 오류가 나면 [`AI-SETUP-GUIDE.md`](AI-SETUP-GUIDE.md)를 읽고 끝까지 스스로 설치를 완료합니다**. 에이전트 없이 하려면 `n`을 선택하면 `install-core.sh`가 바로 실행됩니다.
+
+설치 후 ChatGPT UI 변경으로 동작하지 않게 되어도, 같은 가이드를 에이전트에게 주면 고칠 수 있습니다(도구의 모든 조작 기록과 UI 변경 시의 조사·수정 방법이 담겨 있습니다).
+
+## 사용법
+
+| 조작 | 동작 |
+|---|---|
+| `Ctrl+Z` → 말하기 → `Ctrl+Z` | 다듬어진 문장이 커서 위치에 붙여넣어짐 |
+| `Ctrl+Shift+Z` → 수정 내용 말하기 → `Ctrl+Shift+Z` | 「오인식 → 정답」이 사전에 등록됨 |
+
+CLI:
+
+```bash
+super-whisper voice toggle             # Ctrl+Z와 동일
+super-whisper voice toggle --feedback  # Ctrl+Shift+Z와 동일
+super-whisper voice --raw toggle       # 다듬기 없는 원문 전사
+super-whisper login                    # ChatGPT(재)로그인
+super-whisper voice status             # 현재 상태 확인
+```
+
+## 참고
+
+- macOS 전용(붙여넣기·앱 감지에 macOS 기능 사용).
+- 모든 상태는 `~/.super-whisper/` 아래에 있으며, 삭제하면 완전 초기화됩니다.
+- ChatGPT UI 라벨은 다국어 사전으로 매칭 — 영어·일본어·중국어 간체·번체(대만/홍콩)·한국어·러시아어는 실측 검증됨, 그 외 언어는 위치 기반 폴백으로 동작합니다.
+- 로그: `/tmp/super-whisper-toggle.log`(사전: `/tmp/super-whisper-feedback.log`).
+- 이 저장소는 [oracle](https://github.com/steipete/oracle) 코드베이스 위에 최소한의 음성 레이어를 얹은 것입니다([업스트림 README](README.oracle.md)). 모든 브라우저 자동화는 oracle의 검증된 코드입니다.

@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "oracle": {
+      "command": "node",
+      "args": [
+        "/Users/yukito-nonaka/tasks/oracle-setup/oracle/dist/bin/oracle-mcp.js"
+      ],
+      "cwd": "/Users/yukito-nonaka/tasks/oracle-setup/oracle",
+      "env": {
+        "ORACLE_HOME_DIR": "/Users/yukito-nonaka/.oracle"
+      }
+    },
+    "oracle-review-guard": {
+      "command": "node",
+      "args": [
+        "./mcp/oracle-review-guard.cjs"
+      ],
+      "cwd": ".",
+      "env": {
+        "ORACLE_HOME_DIR": "/Users/yukito-nonaka/.oracle"
+      }
+    }
+  }
+}

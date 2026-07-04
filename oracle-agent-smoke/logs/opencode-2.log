@@ -1,0 +1,329 @@
+=== AGENT_SMOKE_START opencode-2 2026-06-24T02:41:31+0900 ===
+root=/Users/nonaka/tasks/oracle-setup/oracle-agent-smoke
+prompt=/Users/nonaka/tasks/oracle-setup/oracle-agent-smoke/prompts/opencode-2.md
+log=/Users/nonaka/tasks/oracle-setup/oracle-agent-smoke/logs/opencode-2.log
+oracle=/Users/nonaka/.local/bin/oracle
+0.15.0
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mSkill "oracle"
+[0m→ [0mRead .
+[0m
+[0m$ [0moracle --dry-run summary --files-report \
+  --engine browser --model gpt-5.5-pro \
+  --browser-model-strategy select \
+  --browser-attachments always --browser-bundle-files --browser-bundle-format zip \
+  --slug "opencode smoke review rubric" \
+  -p "Review this tiny codebase and produce a practical review rubric: correctness, robustness, tests, and maintainability. Include specific examples from the attached files. This is a smoke test, but give a real, varied response." \
+  --file "README.md" --file "src/**" --file "tests/**"
+🧿 oracle 0.15.0 — When the other agents shrug, the oracle ships.
+[preview] Oracle (0.15.0) browser mode (gpt-5.5-pro) with ~698 tokens (prompt only; 1 attachment excluded).
+[preview] Browser control: launch visible Chrome; may focus/control the browser UI.
+[preview] Browser guidance: A visible automation Chrome window may take focus while Oracle controls ChatGPT.
+[preview] Browser guidance: Use --browser-hide-window, --browser-attach-running, or --remote-chrome to reduce desktop disruption.
+[preview] Bundled upload:
+  • /var/folders/bl/p46q8rsn4qz3t74mlt_rvh300000gn/T/oracle-browser-bundle-kIDUov/attachments-bundle.zip (2.7 KB)
+  (bundled 5 files into /var/folders/bl/p46q8rsn4qz3t74mlt_rvh300000gn/T/oracle-browser-bundle-kIDUov/attachments-bundle.zip)
+[0m
+[0m# [0mTodos
+[✓] Run oracle dry run
+[•] Run live oracle Pro Extended command
+[ ] Wait for Oracle to finish (5-45 min)
+[ ] Render session result and report summary
+[0m
+Dry run succeeded (5 files, 2.7 KB zip, ~698 tokens). Running live now.
+[0m$ [0moracle --engine browser \
+  --model gpt-5.5-pro \
+  --browser-model-strategy select \
+  --browser-attachments always --browser-bundle-files --browser-bundle-format zip \
+  --slug "opencode smoke review rubric" \
+  -p "Review this tiny codebase and produce a practical review rubric: correctness, robustness, tests, and maintainability. Include specific examples from the attached files. This is a smoke test, but give a real, varied response." \
+  --file "README.md" --file "src/**" --file "tests/**"
+🧿 oracle 0.15.0 — Whispering your tokens to the silicon sage.
+Session: opencode-smoke-review-rubric
+Mode: browser foreground
+Models: 1
+Detach: no
+Reattach: oracle session opencode-smoke-review-rubric
+Packed 5 files into 1 bundle (contents counted in token estimate).
+Launching browser mode (gpt-5.5-pro) with ~698 tokens.
+This run can take up to an hour (usually ~10 minutes).
+[browser] Browser control: launch visible Chrome; may focus/control the browser UI.
+[browser] Browser guidance: A visible automation Chrome window may take focus while Oracle controls ChatGPT.
+[browser] Browser guidance: Use --browser-hide-window, --browser-attach-running, or --remote-chrome to reduce desktop disruption.
+[browser] Model picker diagnostic: {"targetModelKind":"pro","targetLevel":"heavy","modelButton":{"tag":"BUTTON","testid":null,"role":null,"ariaLabel":"","ariaExpanded":"true","ariaChecked":null,"ariaSelected":null,"ariaHaspopup":"menu","dataState":"open","text":"Pro Extended","rect":{"w":141,"h":36,"visible":true}},"composerButtons":[{"tag":"BUTTON","testid":"composer-plus-btn","role":null,"ariaLabel":"Add files and more","ariaExpanded":"false","ariaChecked":null,"ariaSelected":null,"ariaHaspopup":"menu","dataState":"closed","text":"","rect":{"w":36,"h":36,"visible":true}},{"tag":"BUTTON","testid":null,"role":null,"ariaLabel":"","ariaExpanded":"true","ariaChecked":null,"ariaSelected":null,"ariaHaspopup":"menu","dataState":"open","text":"Pro Extended","rect":{"w":141,"h":36,"visible":true}}],"trailingCount":0,"trailings":[],"modelSwitcherCount":0,"modelSwitcher":[],"menuCount":1,"menus":[{"role":"menu","testid":null,"itemCount":9,"items":[{"tag":"DIV","testid":"composer-intelligence-picker-content","role":null,"ariaLabel":"","ariaExpanded":null,"ariaChecked":null,"ariaSelected":null,"ariaHaspopup":null,"dataState":null,"text":"[redacted] HighPro ExtendedGPT-5.5","rect":{"w":156,"h":261,"visible":true}},{"tag":"DIV","testid":null,"role":"menuitemradio","ariaLabel":"","ariaExpanded":null,"ariaChecked":"false","ariaSelected":null,"ariaHaspopup":null,"dataState":"unchecked","text":"Instant","rect":{"w":144,"h":36,"visible":true}},{"tag":"DIV","testid":null,"role":"menuitemradio","ariaLabel":"","ariaExpanded":null,"ariaChecked":"false","ariaSelected":null,"ariaHaspopup":null,"dataState":"unchecked","text":"Medium","rect":{"w":144,"h":36,"visible":true}},{"tag":"DIV","testid":null,"role":"menuitemradio","ariaLabel":"","ariaExpanded":null,"ariaChecked":"false","ariaSelected":null,"ariaHaspopup":null,"dataState":"unchecked","text":"High","rect":{"w":144,"h":36,"visible":true}},{"tag":"DIV","testid":null,"role":"menuitemradio","ariaLabel":"","ariaExpanded":null,"ariaChecked":"false","ariaSelected":null,"ariaHaspopup":null,"dataState":"unchecked","text":"Extra High","rect":{"w":144,"h":36,"visible":true}},{"tag":"DIV","testid":null,"role":"menuitemradio","ariaLabel":"","ariaExpanded":null,"ariaChecked":"true","ariaSelected":null,"ariaHaspopup":null,"dataState":null,"text":"Pro Extended","rect":{"w":144,"h":36,"visible":true}},{"tag":"BUTTON","testid":"composer-intelligence-pro-thinking-effort-trigger","role":"menuitem","ariaLabel":"Pro effort options","ariaExpanded":"false","ariaChecked":null,"ariaSelected":null,"ariaHaspopup":"menu","dataState":"closed","text":"","rect":{"w":26,"h":32,"visible":true}},{"tag":"DIV","testid":null,"role":"menuitem","ariaLabel":"","ariaExpanded":"false","ariaChecked":null,"ariaSelected":null,"ariaHaspopup":"menu","dataState":"closed","text":"GPT-5.5","rect":{"w":144,"h":36,"visible":true}},{"tag":"svg","testid":"menu-item-submenu-chevron","role":null,"ariaLabel":"","ariaExpanded":null,"ariaChecked":null,"ariaSelected":null,"ariaHaspopup":null,"dataState":null,"text":"","rect":{"w":16,"h":16,"visible":true}}]}]}
+[browser] Thinking time: option not found for pro (requested Heavy); continuing with ChatGPT default.
+[browser] Waiting for ChatGPT response - 30s elapsed; no thinking status detected yet.
+[browser] Waiting for ChatGPT response - 1m 0s elapsed; no thinking status detected yet.
+[browser] Waiting for ChatGPT response - 1m 30s elapsed; no thinking status detected yet.
+[browser] ChatGPT thinking - 2m 0s elapsed; status=active; source=inline
+[browser] ChatGPT thinking - 2m 30s elapsed; status=active; last change 30s ago; source=inline
+[browser] Waiting for ChatGPT response - 3m 0s elapsed; no thinking status detected yet.
+[browser] Waiting for ChatGPT response - 3m 30s elapsed; no thinking status detected yet.
+[browser] Waiting for ChatGPT response - 4m 0s elapsed; no thinking status detected yet.
+[browser] Archived ChatGPT conversation after saving local artifacts.
+[browser] Model selection evidence: requested=Pro; resolved=Pro Extended; status=already-selected; strategy=select; verified=yes.
+Answer:
+## Assessment: 30/100 — changes required
+
+The code is small and readable, but several defects affect core behavior. It is not currently mergeable under a production-oriented rubric.
+
+| Area            |  Weight |  Score | Main reason                                                                            |
+| --------------- | ------: | -----: | -------------------------------------------------------------------------------------- |
+| Correctness     |      40 |     13 | Coupon dispatch and scheduling are wrong                                               |
+| Robustness      |      25 |      6 | Inputs and temporal/numeric invariants are largely unchecked                           |
+| Tests           |      20 |      5 | Useful regression cases exist, but neither test environment is reproducibly configured |
+| Maintainability |      15 |      6 | Simple structure, but contracts, naming, packaging, and side effects need work         |
+| **Total**       | **100** | **30** | **Reject pending fixes**                                                               |
+
+A practical merge policy would require at least 75/100, with no known defect in a core path and all documented test commands passing.
+
+## Highest-priority findings
+
+### 1. Every non-empty coupon becomes `SAVE10`
+
+`src/cart.js:6` uses assignment rather than comparison:
+
+```js
+if (code = "SAVE10") {
+```
+
+Consequences:
+
+* `"NOPE"` returns `90` for a $100 cart instead of the tested `115`.
+* `"FREESHIP"` also returns `90`.
+* The actual `FREESHIP` branch at lines 10–12 is unreachable for every truthy code.
+
+This is a critical correctness defect. A lint rule such as `no-cond-assign` should prevent recurrence.
+
+### 2. The meaning of the returned cart total is internally inconsistent
+
+Different paths include shipping differently:
+
+* No code, `src/cart.js:4`: returns only `subtotal`.
+* `SAVE10`, line 7: returns discounted subtotal without shipping.
+* Unknown code, line 14: ostensibly returns subtotal plus shipping.
+* `FREESHIP`: intends to return subtotal with zero shipping.
+
+The tests preserve the same ambiguity. `tests/cart.test.js:5` expects `180` for a $200 subtotal with $15 shipping, while line 10 expects an unknown code to include shipping.
+
+Before fixing the arithmetic, define the contract. If this function returns an order total, the likely expectations are:
+
+| Case         | $100 subtotal, $15 shipping |
+| ------------ | --------------------------: |
+| No code      |                         115 |
+| Unknown code |                         115 |
+| `SAVE10`     |                         105 |
+| `FREESHIP`   |                         100 |
+
+If discounts deliberately return merchandise totals only, the function should be renamed and shipping handled elsewhere.
+
+### 3. Missed scheduler intervals are calculated incorrectly
+
+At `src/scheduler.py:9–10`, a stale candidate is replaced with:
+
+```python
+return now + timedelta(minutes=interval_minutes)
+```
+
+This resets the schedule relative to `now`, rather than catching up on the cadence anchored at `last_run`.
+
+The supplied test uses:
+
+* `last_run`: 10:00
+* interval: 30 minutes
+* `now`: 12:00
+
+Expected: 12:00
+Actual: 12:30
+
+The correct calculation should find the first scheduled boundary at or after `now`. It also needs to define what happens when `last_run == now`; normally the next result would be `now + interval`.
+
+### 4. The promised null tolerance for SKUs is absent
+
+`tests/cart.test.js:13–15` explicitly requires `normalizeSku(null)` to return `""`, but `src/cart.js:18` dereferences `null` and throws a `TypeError`.
+
+The contract should also decide how to handle:
+
+* `undefined`, including a completely omitted argument
+* numbers or objects
+* whitespace-only strings
+
+Robustness does not necessarily require coercion: rejecting invalid values with a clear exception is acceptable, but it must agree with the tests and documented API.
+
+### 5. The repository lacks a reproducible test setup
+
+Observed execution results:
+
+* `npm test` cannot start because there is no `package.json`.
+* The JavaScript tests use Jest-style globals but declare no runner or dependency.
+* `python -m pytest -q` ran two tests: **one passed and one failed**.
+* In this environment, invoking `pytest -q` directly failed to import `src.scheduler`, while `python -m pytest` succeeded. This command-dependent behavior indicates incomplete Python packaging.
+
+At minimum, add:
+
+* `package.json`, a test script, a pinned runner, and a lockfile
+* `pyproject.toml` with supported Python version and test configuration
+* an actual importable package rather than treating the generic `src` directory as the package name
+* exact test commands in `README.md`
+
+## Review rubric
+
+### Correctness — 40 points
+
+**Core behavior: 25 points**
+
+Award full credit when every advertised operation produces the specified result on normal inputs.
+
+Review examples here:
+
+* Each coupon reaches only its intended branch.
+* The returned total follows one consistent shipping policy.
+* `next_run` preserves cadence over one or many missed intervals.
+* Digest filtering matches the defined eligibility rules.
+
+**Boundary semantics: 10 points**
+
+Require behavior to be specified and tested at boundaries:
+
+* Empty cart
+* Missing coupon versus unknown coupon
+* A schedule exactly equal to `now`
+* Multiple missed intervals
+* `last_run is None`
+* Missing or blank email
+
+**Invariants and side effects: 5 points**
+
+`src/cart.js:11` mutates `cart.shipping`. That branch is currently unreachable, but after fixing line 6 it would introduce a surprising caller-visible side effect. Full credit should require either a documented mutation or, preferably, pure calculation without changing the input cart.
+
+**Current score: 13/40.**
+
+### Robustness — 25 points
+
+**Input contracts and validation: 10 points**
+
+Functions should either accept malformed input safely or reject it predictably.
+
+Current weaknesses include:
+
+* Missing `cart`, `items`, `shipping`, `price`, or `quantity` can produce exceptions or `NaN`.
+* `normalizeSku` accepts only actual strings despite its test contract.
+* `should_send_digest` raises `KeyError` when `"enabled"` is absent.
+* An empty email string is accepted because it is merely non-`None`.
+* `"false"` is truthy and is treated as enabled.
+
+**Numeric and temporal safety: 8 points**
+
+* Reject zero or negative scheduling intervals. Currently `-30` can return a time in the past.
+* Define whether datetimes must be timezone-aware. Comparing naive and aware datetimes raises an exception.
+* Decide how future `last_run` values and clock changes are handled.
+* Avoid binary floating-point for currency. Integer cents or a decimal-money representation would be safer.
+
+**Failure behavior: 7 points**
+
+Failures should not silently corrupt results. For example, malformed item prices should not turn an order total into `NaN` without explanation.
+
+**Current score: 6/25.**
+
+### Tests — 20 points
+
+**Reproducibility: 7 points**
+
+A clean checkout should run with documented commands and pinned dependencies. This repository currently earns little credit because the JavaScript suite cannot be launched and Python imports depend on invocation style.
+
+**Behavioral coverage: 8 points**
+
+The existing tests deserve credit for targeting real bugs:
+
+* Unknown coupon
+* Null SKU
+* Scheduler catch-up
+* Disabled digest users
+
+However, important paths are absent:
+
+* `FREESHIP`
+* No coupon
+* Cart mutation
+* Empty items
+* One-interval and non-exact scheduler catch-up
+* Zero and negative intervals
+* Blank email and malformed user records
+
+**Test quality: 5 points**
+
+Tests should establish a coherent contract. The conflicting shipping expectations prevent the cart tests from serving as a reliable specification.
+
+The test name “tolerates missing sku” is also slightly misleading: it passes explicit `null`, not a missing argument. Test both separately if they are equivalent.
+
+**Current score: 5/20.**
+
+### Maintainability — 15 points
+
+**Names, documentation, and types: 5 points**
+
+`should_send_digest` sounds like a Boolean predicate but returns a list. A name such as `eligible_digest_users` would communicate its behavior better.
+
+Add:
+
+* Return annotation for `next_run`
+* A typed user representation or mapping protocol
+* JSDoc or TypeScript types for cart structure
+* Brief documentation of shipping, coupon, and scheduling semantics
+
+**Project structure and tooling: 5 points**
+
+Introduce standard package metadata, formatters, linters, and a single top-level verification command. Recommended static checks include ESLint’s conditional-assignment rule and Python type checking.
+
+**Ease of change: 5 points**
+
+Coupon logic should compute discount and shipping independently rather than mixing early returns and mutation. That will make adding another coupon less likely to affect unrelated paths.
+
+**Current score: 6/15.**
+
+## Minimum regression suite before approval
+
+The cart suite should cover no code, unknown code, `SAVE10`, and `FREESHIP` using the same subtotal and shipping values; it should also assert that the input cart remains unchanged.
+
+The scheduler suite should cover:
+
+```text
+last=None                         -> now
+last=11:30, interval=30, now=12  -> 12:00
+last=10:00, interval=30, now=12  -> 12:00
+last=10:10, interval=30, now=12  -> 12:10
+last=12:00, interval=30, now=12  -> 12:30
+interval=0 or negative           -> clear exception
+```
+
+Digest tests should define behavior for absent `enabled`, non-Boolean `enabled`, `None`, empty, and whitespace-only emails.
+
+Once those cases pass through documented commands on a clean checkout, the score would likely rise into the 75–85 range.
+
+
+4m41s · gpt-5.5-pro[browser] · ↑698 ↓2.41k ↻0 Δ3.11k
+files=3
+[0m
+[0m# [0mTodos
+[✓] Run oracle dry run
+[✓] Run live oracle Pro Extended command
+[✓] Wait for Oracle to finish (5-45 min)
+[✓] Render session result and report summary
+[0m
+**AGENT_SMOKE_DONE opencode-2**
+
+- **Session:** `opencode-smoke-review-rubric`
+- **Zipped attachment bundling:** Yes — 5 files packed into 1 zip (2.7 KB)
+- **Model:** gpt-5.5‑pro (Pro Extended) · **Duration:** 4m41s
+
+**Oracle answer summary:**
+
+1. Overall score **30/100** — "Reject pending fixes"
+2. **Critical bug:** `src/cart.js:6` uses assignment (`=`) instead of comparison (`==`), making every non-empty coupon return `SAVE10` — `FREESHIP` branch is unreachable
+3. **Scheduler bug:** `next_run` resets relative to `now` instead of catching up to the cadence anchored at `last_run` (off by one interval)
+4. **Test suite broken:** JS tests have no `package.json`/runner; Python tests depend on invocation style; shipping semantics are internally inconsistent
+5. **Robustness gaps:** `normalizeSku(null)` throws `TypeError` despite test expecting `""`; no validation of cart structure, interval signs, or timezone awareness
+6. **Prescriptive rubric** with weighted scoring (Correctness 40%, Robustness 25%, Tests 20%, Maintainability 15%) and a specific regression suite required to reach merge threshold (~75/100)
+=== AGENT_SMOKE_EXIT opencode-2 code=0 2026-06-24T02:49:15+0900 ===

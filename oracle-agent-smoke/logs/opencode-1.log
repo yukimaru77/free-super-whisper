@@ -1,0 +1,10 @@
+=== AGENT_SMOKE_START opencode-1 2026-06-24T02:41:31+0900 ===
+root=/Users/nonaka/tasks/oracle-setup/oracle-agent-smoke
+prompt=/Users/nonaka/tasks/oracle-setup/oracle-agent-smoke/prompts/opencode-1.md
+log=/Users/nonaka/tasks/oracle-setup/oracle-agent-smoke/logs/opencode-1.log
+oracle=/Users/nonaka/.local/bin/oracle
+0.15.0
+[91m[1mError: [0mUnexpected error
+
+database is locked
+=== AGENT_SMOKE_EXIT opencode-1 code=1 2026-06-24T02:41:32+0900 ===

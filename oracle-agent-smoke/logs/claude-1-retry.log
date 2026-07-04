@@ -1,0 +1,17 @@
+=== AGENT_SMOKE_START claude-1-retry 2026-06-24T02:49:45+0900 ===
+root=/Users/nonaka/tasks/oracle-setup/oracle-agent-smoke
+prompt=/Users/nonaka/tasks/oracle-setup/oracle-agent-smoke/prompts/claude-1-retry.md
+log=/Users/nonaka/tasks/oracle-setup/oracle-agent-smoke/logs/claude-1-retry.log
+oracle=/Users/nonaka/.local/bin/oracle
+0.15.0
+AGENT_SMOKE_DONE claude-1-retry
+
+- Oracle session slug: `claude-smoke-cart-evaluation-retry`
+- Zipped attachment bundling used: yes — Oracle packed 3 files into 1 ZIP bundle.
+- Oracle verdict: request changes.
+- Oracle found `src/cart.js:6` uses assignment instead of comparison, making invalid codes and `FREESHIP` behave like `SAVE10`.
+- Oracle found `normalizeSku(null)` throws, despite the test expecting an empty string.
+- Oracle flagged inconsistent shipping behavior between no code, invalid code, `SAVE10`, and `FREESHIP`.
+- Oracle flagged mutation side effects from `cart.shipping = 0`, recommending local shipping calculation instead.
+- Oracle said the tests catch the assignment and null-SKU bugs, but miss `FREESHIP`, mutation leakage, normal SKU behavior, malformed inputs, and pricing edge cases.
+=== AGENT_SMOKE_EXIT claude-1-retry code=0 2026-06-24T02:54:00+0900 ===

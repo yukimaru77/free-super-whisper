@@ -1,0 +1,8 @@
+=== AGENT_SMOKE_START claude-1 2026-06-24T02:41:27+0900 ===
+root=/Users/nonaka/tasks/oracle-setup/oracle-agent-smoke
+prompt=/Users/nonaka/tasks/oracle-setup/oracle-agent-smoke/prompts/claude-1.md
+log=/Users/nonaka/tasks/oracle-setup/oracle-agent-smoke/logs/claude-1.log
+oracle=/Users/nonaka/.local/bin/oracle
+0.15.0
+The first live run failed before submission due to browser model-selector/cookie state, so I started a single recovery run with Oracle’s suggested `--browser-model-strategy current` fallback. I’ll wait for that run’s completion notification and then summarize the rendered session.
+=== AGENT_SMOKE_EXIT claude-1 code=0 2026-06-24T02:44:31+0900 ===

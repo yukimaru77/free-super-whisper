@@ -1,0 +1,442 @@
+import { describe, expect, test } from "vitest";
+import { buildBrowserConfig, resolveBrowserModelLabel } from "../../src/cli/browserConfig.js";
+
+describe("buildBrowserConfig", () => {
+  test("uses defaults when optional flags omitted", async () => {
+    const config = await buildBrowserConfig({ model: "gpt-5.5-pro" });
+    expect(config).toMatchObject({
+      chromeProfile: "Default",
+      chromePath: null,
+      chromeCookiePath: null,
+      url: undefined,
+      timeoutMs: undefined,
+      inputTimeoutMs: undefined,
+      cookieSync: undefined,
+      headless: undefined,
+      keepBrowser: undefined,
+      hideWindow: undefined,
+      desiredModel: "Pro",
+      debug: undefined,
+      allowCookieErrors: true,
+      researchMode: "off",
+      archiveConversations: undefined,
+    });
+  });
+
+  test("maps gpt-5.4 browser runs to Thinking 5.4", async () => {
+    const config = await buildBrowserConfig({ model: "gpt-5.4" });
+    expect(config.desiredModel).toBe("Thinking 5.4");
+  });
+
+  test("keeps version signal for gpt-5.5 Instant browser runs", async () => {
+    const config = await buildBrowserConfig({ model: "gpt-5.5-instant" });
+    expect(config.desiredModel).toBe("GPT-5.5 Instant");
+  });
+
+  test("sets model strategy when provided", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.2-pro",
+      browserModelStrategy: "current",
+    });
+    expect(config.modelStrategy).toBe("current");
+  });
+
+  test("maps --copy-profile to copyProfileSource", async () => {
+    const source = "/Users/me/Library/Application Support/Google/Chrome";
+    const config = await buildBrowserConfig({ model: "gpt-5.5-pro", copyProfile: source });
+    expect(config.copyProfileSource).toBe(source);
+    expect(config.chromeProfile).toBeNull();
+    const selected = await buildBrowserConfig({
+      model: "gpt-5.5-pro",
+      copyProfile: source,
+      browserChromeProfile: "Profile 4",
+    });
+    expect(selected.chromeProfile).toBe("Profile 4");
+  });
+
+  test("leaves copyProfileSource undefined without --copy-profile", async () => {
+    const config = await buildBrowserConfig({ model: "gpt-5.5-pro" });
+    expect(config.copyProfileSource).toBeUndefined();
+  });
+
+  test("rejects --copy-profile combined with --browser-keep-browser", async () => {
+    await expect(
+      buildBrowserConfig({
+        model: "gpt-5.5-pro",
+        copyProfile: "/Users/me/Library/Application Support/Google/Chrome",
+        browserKeepBrowser: true,
+      }),
+    ).rejects.toThrow(/--copy-profile cannot be combined with --browser-keep-browser/);
+  });
+
+  test("rejects --copy-profile combined with --browser-manual-login", async () => {
+    await expect(
+      buildBrowserConfig({
+        model: "gpt-5.5-pro",
+        copyProfile: "/Users/me/Library/Application Support/Google/Chrome",
+        browserManualLogin: true,
+      }),
+    ).rejects.toThrow(/--copy-profile cannot be combined with --browser-manual-login/);
+  });
+
+  test("rejects --copy-profile combined with existing or remote browser modes", async () => {
+    const source = "/Users/me/Library/Application Support/Google/Chrome";
+    await expect(
+      buildBrowserConfig({
+        model: "gpt-5.5-pro",
+        copyProfile: source,
+        browserAttachRunning: true,
+      }),
+    ).rejects.toThrow(/browser-attach-running cannot be combined with --copy-profile/);
+    await expect(
+      buildBrowserConfig({
+        model: "gpt-5.5-pro",
+        copyProfile: source,
+        remoteChrome: "127.0.0.1:9222",
+      }),
+    ).rejects.toThrow(/copy-profile cannot be combined with --remote-chrome/);
+    await expect(
+      buildBrowserConfig({
+        model: "gpt-5.5-pro",
+        copyProfile: source,
+        remoteHost: "browser.example:9473",
+      }),
+    ).rejects.toThrow(/copy-profile cannot be combined with --remote-host/);
+  });
+
+  test("enables Deep Research browser mode when requested", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.4-pro",
+      browserResearch: "deep",
+    });
+    expect(config.researchMode).toBe("deep");
+  });
+
+  test("sets browser archive mode when requested", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.4-pro",
+      browserArchive: "never",
+    });
+    expect(config.archiveConversations).toBe("never");
+  });
+
+  test("honors overrides and converts durations + booleans", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.1",
+      browserChromeProfile: "Profile 2",
+      browserChromePath: "/Applications/Chrome.app",
+      browserCookiePath: "/tmp/cookies.db",
+      browserUrl: "https://chat.example.com",
+      browserTimeout: "120s",
+      browserInputTimeout: "5s",
+      browserAttachmentTimeout: "2m",
+      browserProfileLockTimeout: "2m",
+      browserMaxConcurrentTabs: "5",
+      browserCookieWait: "4s",
+      browserNoCookieSync: true,
+      browserHeadless: true,
+      browserHideWindow: true,
+      browserKeepBrowser: true,
+      browserAllowCookieErrors: true,
+      verbose: true,
+    });
+    expect(config).toMatchObject({
+      chromeProfile: "Profile 2",
+      chromePath: "/Applications/Chrome.app",
+      chromeCookiePath: "/tmp/cookies.db",
+      url: "https://chat.example.com/",
+      timeoutMs: 120_000,
+      inputTimeoutMs: 5_000,
+      attachmentTimeoutMs: 120_000,
+      profileLockTimeoutMs: 120_000,
+      maxConcurrentTabs: 5,
+      cookieSyncWaitMs: 4_000,
+      cookieSync: false,
+      headless: undefined,
+      hideWindow: true,
+      keepBrowser: true,
+      desiredModel: "GPT-5.2",
+      debug: true,
+      allowCookieErrors: true,
+    });
+  });
+
+  test("prefers explicit browser model label when provided", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.2-pro",
+      browserModelLabel: "Instant",
+    });
+    expect(config.desiredModel).toBe("Pro");
+  });
+
+  test("carries manual-login profile pool from config defaults", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.5-pro",
+      browserManualLogin: true,
+      browserManualLoginProfileDirs: ["/tmp/account-a", "/tmp/account-b"],
+    });
+
+    expect(config.manualLogin).toBe(true);
+    expect(config.manualLoginProfileDir).toBeUndefined();
+    expect(config.manualLoginProfileDirs).toEqual(["/tmp/account-a", "/tmp/account-b"]);
+  });
+
+  test("carries auto-managed manual-login profile pool size from config defaults", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.5-pro",
+      browserManualLogin: true,
+      browserManualLoginProfilePoolSize: 2,
+    });
+
+    expect(config.manualLogin).toBe(true);
+    expect(config.manualLoginProfileDir).toBeUndefined();
+    expect(config.manualLoginProfilePoolSize).toBe(2);
+    expect(config.manualLoginProfileDirs).toBeUndefined();
+  });
+
+  test("rejects invalid browser max concurrent tabs", async () => {
+    await expect(
+      buildBrowserConfig({
+        model: "gpt-5.1",
+        browserMaxConcurrentTabs: "0",
+      }),
+    ).rejects.toThrow(/max concurrent tabs/i);
+  });
+
+  test("falls back to canonical label when override matches base model", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.1",
+      browserModelLabel: "gpt-5.1",
+    });
+    expect(config.desiredModel).toBe("GPT-5.2");
+  });
+
+  test("maps legacy Gemini Pro to current Pro label", async () => {
+    const config = await buildBrowserConfig({
+      model: "gemini-3-pro",
+    });
+    expect(config.desiredModel).toBe("Gemini 3.1 Pro");
+  });
+
+  test.each([
+    ["gemini-3.1-flash-lite", "Gemini 3.1 Flash-Lite"],
+    ["gemini-3.5-flash", "Gemini 3.5 Flash"],
+    ["gemini-3.1-pro", "Gemini 3.1 Pro"],
+  ])("maps current Gemini model %s to %s", async (model, expected) => {
+    const config = await buildBrowserConfig({ model });
+    expect(config.desiredModel).toBe(expected);
+  });
+
+  test("maps deep-think Gemini model to deep-think label", async () => {
+    const config = await buildBrowserConfig({
+      model: "gemini-3-pro-deep-think",
+    });
+    expect(config.desiredModel).toBe("gemini-3-deep-think");
+  });
+
+  test("trims whitespace around override labels", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.1",
+      browserModelLabel: "  ChatGPT 5.1 Instant  ",
+    });
+    expect(config.desiredModel).toBe("GPT-5.2");
+  });
+
+  test("parses remoteChrome host targets", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.2-pro",
+      remoteChrome: "remote-host:9333",
+    });
+    expect(config.remoteChrome).toEqual({ host: "remote-host", port: 9_333 });
+  });
+
+  test("enables attach-running with auto-connect by default", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.2-pro",
+      browserAttachRunning: true,
+    });
+    expect(config.attachRunning).toBe(true);
+  });
+
+  test("passes through a browser tab ref", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.2-pro",
+      browserTab: "current",
+    });
+    expect(config.browserTabRef).toBe("current");
+  });
+
+  test("still accepts browser-chrome-path when attach-running is enabled", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.2-pro",
+      browserAttachRunning: true,
+      browserChromePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    });
+    expect(config.attachRunning).toBe(true);
+    expect(config.chromePath).toBe("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome");
+  });
+
+  test("rejects launcher-owned flags when attach-running is enabled", async () => {
+    await expect(
+      buildBrowserConfig({
+        model: "gpt-5.2-pro",
+        browserAttachRunning: true,
+        browserManualLogin: true,
+      }),
+    ).rejects.toThrow(/attach-running/i);
+  });
+
+  test("rejects browser-chrome-profile when attach-running is enabled", async () => {
+    await expect(
+      buildBrowserConfig({
+        model: "gpt-5.2-pro",
+        browserAttachRunning: true,
+        browserChromeProfile: "Profile 2",
+      }),
+    ).rejects.toThrow(/attach-running/i);
+  });
+
+  test("rejects browser-manual-login-profile-dir when attach-running is enabled", async () => {
+    await expect(
+      buildBrowserConfig({
+        model: "gpt-5.2-pro",
+        browserAttachRunning: true,
+        browserManualLoginProfileDir: "/tmp/oracle-profile",
+      }),
+    ).rejects.toThrow(/attach-running/i);
+  });
+
+  test("rejects inline cookie overrides when attach-running is enabled", async () => {
+    await expect(
+      buildBrowserConfig({
+        model: "gpt-5.2-pro",
+        browserAttachRunning: true,
+        browserInlineCookies: "[]",
+      }),
+    ).rejects.toThrow(/attach-running/i);
+  });
+
+  test("allows remote-chrome as an attach-running hint", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.2-pro",
+      browserAttachRunning: true,
+      remoteChrome: "remote-host:9333",
+    });
+    expect(config.attachRunning).toBe(true);
+    expect(config.remoteChrome).toEqual({ host: "remote-host", port: 9_333 });
+  });
+
+  test("normalizes chatgpt-url alias and adds https when missing", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.1",
+      chatgptUrl: "chatgpt.example.com/workspace",
+    });
+    expect(config.url).toBe("https://chatgpt.example.com/workspace");
+  });
+
+  test("rejects invalid chatgpt URL protocols", async () => {
+    await expect(
+      buildBrowserConfig({
+        model: "gpt-5.1",
+        chatgptUrl: "ftp://chatgpt.example.com",
+      }),
+    ).rejects.toThrow(/http/i);
+  });
+
+  test("allows temporary chat URLs when targeting Pro", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.5-pro",
+      chatgptUrl: "https://chatgpt.com/?temporary-chat=true",
+    });
+    expect(config.url).toBe("https://chatgpt.com/?temporary-chat=true");
+    expect(config.desiredModel).toBe("Pro");
+    expect(config.modelStrategy).toBe("select");
+  });
+
+  test("allows temporary chat URLs when model strategy keeps current selection", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.2-pro",
+      chatgptUrl: "https://chatgpt.com/?temporary-chat=true",
+      browserModelStrategy: "current",
+    });
+    expect(config.url).toBe("https://chatgpt.com/?temporary-chat=true");
+    expect(config.modelStrategy).toBe("current");
+  });
+
+  test("allows temporary chat URLs when not targeting Pro", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.2",
+      chatgptUrl: "https://chatgpt.com/?temporary-chat=true",
+    });
+    expect(config.url).toBe("https://chatgpt.com/?temporary-chat=true");
+    expect(config.desiredModel).toBe("GPT-5.2");
+  });
+
+  test("accepts IPv6 remoteChrome targets wrapped in brackets", async () => {
+    const config = await buildBrowserConfig({
+      model: "gpt-5.2-pro",
+      remoteChrome: "[2001:db8::1]:9222",
+    });
+    expect(config.remoteChrome).toEqual({ host: "2001:db8::1", port: 9_222 });
+  });
+
+  test("rejects malformed remoteChrome targets", async () => {
+    await expect(
+      buildBrowserConfig({
+        model: "gpt-5.2-pro",
+        remoteChrome: "just-a-host",
+      }),
+    ).rejects.toThrow(/host:port/i);
+  });
+
+  test("rejects remoteChrome IPv6 without brackets", async () => {
+    await expect(
+      buildBrowserConfig({
+        model: "gpt-5.2-pro",
+        remoteChrome: "2001:db8::1:9222",
+      }),
+    ).rejects.toThrow(/Wrap IPv6 addresses/i);
+  });
+
+  test("rejects out-of-range remoteChrome ports", async () => {
+    await expect(
+      buildBrowserConfig({
+        model: "gpt-5.2-pro",
+        remoteChrome: "server:70000",
+      }),
+    ).rejects.toThrow(/between 1 and 65535/i);
+  });
+});
+
+describe("resolveBrowserModelLabel", () => {
+  test("returns canonical ChatGPT label when CLI value matches API model", () => {
+    expect(resolveBrowserModelLabel("gpt-5.5-pro", "gpt-5.5-pro")).toBe("Pro");
+    expect(resolveBrowserModelLabel("gpt-5.5-instant", "gpt-5.5-instant")).toBe("GPT-5.5 Instant");
+    expect(resolveBrowserModelLabel("gpt-5.5", "gpt-5.5")).toBe("Thinking 5.5");
+    expect(resolveBrowserModelLabel("gpt-5.4-pro", "gpt-5.4-pro")).toBe("Pro");
+    expect(resolveBrowserModelLabel("gpt-5.4", "gpt-5.4")).toBe("Thinking 5.4");
+    expect(resolveBrowserModelLabel("gpt-5-pro", "gpt-5-pro")).toBe("Pro");
+    expect(resolveBrowserModelLabel("gpt-5.2-pro", "gpt-5.2-pro")).toBe("Pro");
+    expect(resolveBrowserModelLabel("gpt-5.1-pro", "gpt-5.1-pro")).toBe("Pro");
+    expect(resolveBrowserModelLabel("GPT-5.1", "gpt-5.1")).toBe("GPT-5.2");
+  });
+
+  test("falls back to canonical label when input is empty", () => {
+    expect(resolveBrowserModelLabel("", "gpt-5.1")).toBe("GPT-5.2");
+  });
+
+  test("preserves descriptive labels to target alternate picker entries", () => {
+    expect(resolveBrowserModelLabel("ChatGPT 5.1 Instant", "gpt-5.1")).toBe("ChatGPT 5.1 Instant");
+  });
+
+  test("supports undefined or whitespace-only input", () => {
+    expect(resolveBrowserModelLabel(undefined, "gpt-5.2-pro")).toBe("Pro");
+    expect(resolveBrowserModelLabel("   ", "gpt-5.1")).toBe("GPT-5.2");
+  });
+
+  test("trims descriptive labels before returning them", () => {
+    expect(resolveBrowserModelLabel("  ChatGPT 5.1 Thinking ", "gpt-5.1")).toBe(
+      "ChatGPT 5.1 Thinking",
+    );
+  });
+});
