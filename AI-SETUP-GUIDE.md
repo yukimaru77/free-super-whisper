@@ -206,6 +206,35 @@ that steals the user's focus. Real keystrokes only where noted.
   back to "any options-like button". After a successful delete, wait ~1s
   before navigating away or the deletion may not commit server-side.
 
+## OBSERVABILITY — READ THIS FIRST WHEN DEBUGGING
+
+Every voice run is fully traced. Before probing anything live, reconstruct
+what happened from the artifacts in `~/.super-whisper/logs/`:
+
+- `metrics.jsonl` — one line per run: action, status (ok/error/dropped),
+  duration, and the error message. `tail -5` tells you instantly whether
+  failures are new, frequent, or one-off.
+- `trace-<runId>.jsonl` — every log line and milestone of one run as
+  structured events with timestamps and elapsed ms. The newest file is the
+  latest run: `ls -t ~/.super-whisper/logs/trace-* | head -1`.
+- `<runId>-*-failure.png` — a SCREENSHOT of the automated tab taken at the
+  moment the run failed. Open it. Nine times out of ten the bug is visible:
+  an onboarding popover, a login wall, a renamed button, a stuck spinner.
+- `<runId>-*-failure.json` — the page URL plus every visible control
+  (tag/role/testid/aria/text) at the failure moment — diff these labels
+  against `src/browser/uiLabels.ts` to spot renamed UI strings.
+
+Debug recipe for a reported failure:
+1. `tail -5 ~/.super-whisper/logs/metrics.jsonl` — find the failing runId.
+2. Open its `-failure.png`. If a control was renamed, the fix is a token in
+   `src/browser/uiLabels.ts`; confirm the new label in `-failure.json`.
+3. Read `trace-<runId>.jsonl` to see which step the time went to and what
+   the last successful action was.
+4. Only then fall back to the live probe loop below.
+
+Old runs are pruned automatically (last 200 kept). The human-readable
+mirror of every trace is /tmp/super-whisper-toggle.log.
+
 ## HOW EVERY FACT ABOVE WAS DISCOVERED (repeat this method when stuck)
 
 None of the field notes came from documentation — each one came out of the

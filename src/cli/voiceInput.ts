@@ -23,6 +23,7 @@ import {
 } from "../browser/voiceInputRunner.js";
 import { copyToClipboard } from "./clipboard.js";
 import { getWhisperHomeDir } from "../whisperHome.js";
+import { VoiceTrace, setActiveVoiceTrace } from "../voiceObservability.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -63,11 +64,15 @@ export async function runVoiceInputCliCommand(
     return;
   }
 
-  const logger = ((message: string) => {
+  const trace = new VoiceTrace(feedbackMode ? `${action}-feedback` : action, {
+    project: options.project ?? null,
+  });
+  setActiveVoiceTrace(trace);
+  const logger = trace.wrapLogger(((message: string) => {
     if (options.verbose || !message.startsWith("[debug]")) {
       console.log(chalk.dim(message));
     }
-  }) as (message: string) => void;
+  }) as (message: string) => void);
 
   // Capture the frontmost app before any browser work (and before waiting on
   // the lock) so the finish step can paste the transcript back where the user
@@ -88,6 +93,7 @@ export async function runVoiceInputCliCommand(
       lock = await acquireVoiceCommandLock({ logger, timeoutMs: 1_500 });
     } catch {
       logger("[voice] Another voice command is still running; ignoring this hotkey press.");
+      trace.finish("dropped");
       return;
     }
   } else {
@@ -112,6 +118,11 @@ export async function runVoiceInputCliCommand(
         replyMode: feedbackMode ? false : Boolean(options.project),
         feedbackMode,
         projectInstructions: feedbackMode ? VOICE_FEEDBACK_INSTRUCTIONS : null,
+      });
+      trace.event("recording-started", {
+        project: result.state.projectName,
+        model: result.state.desiredModelLabel,
+        chromePort: result.state.chromePort,
       });
       if (options.json) {
         console.log(JSON.stringify(result, null, 2));
@@ -178,6 +189,13 @@ export async function runVoiceInputCliCommand(
         }
         throw error;
       }
+      trace.event("finish-complete", {
+        transcriptChars: result.transcript.length,
+        replyMode: Boolean(result.state.replyMode),
+        feedbackMode: Boolean(result.state.feedbackMode),
+        pasted,
+        conversationUrl: result.conversationUrl ?? null,
+      });
       if (feedbackMode) {
         if (result.conversationUrl) {
           spawnFeedbackCollector(result.state, result.conversationUrl, options, logger);
@@ -223,8 +241,15 @@ export async function runVoiceInputCliCommand(
       return;
     }
     console.log(chalk.bold("ChatGPT voice input cancelled"));
+  } catch (error) {
+    trace.recordError(error);
+    trace.finish("error");
+    throw error;
   } finally {
+    // No-op when the error/dropped paths already closed the run.
+    trace.finish("ok");
     await lock?.release().catch(() => undefined);
+    setActiveVoiceTrace(null);
   }
 }
 
@@ -317,9 +342,14 @@ export interface VoiceFeedbackCollectCliOptions {
 export async function runVoiceFeedbackCollectCommand(
   options: VoiceFeedbackCollectCliOptions,
 ): Promise<void> {
-  const logger = (message: string) => {
+  const trace = new VoiceTrace("feedback-collect", {
+    conversationUrl: options.conversationUrl,
+    project: options.project ?? null,
+  });
+  setActiveVoiceTrace(trace);
+  const logger = trace.wrapLogger((message: string) => {
     console.log(`${new Date().toISOString()} ${message}`);
-  };
+  });
   try {
     const result = await collectVoiceFeedback({
       chromeHost: options.chromeHost,
@@ -329,6 +359,7 @@ export async function runVoiceFeedbackCollectCommand(
       replyTimeoutMs: options.replyTimeout ? parseDuration(options.replyTimeout, 240_000) : undefined,
       log: logger,
     });
+    trace.finish("ok", { pairs: result.pairs.length, instructionsUpdated: result.instructionsUpdated });
     if (result.pairs.length > 0) {
       await notifyMac(
         `Dictionary updated (${result.pairs.length})`,
@@ -340,8 +371,12 @@ export async function runVoiceFeedbackCollectCommand(
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     logger(`[voice] Feedback collection failed: ${message}`);
+    trace.recordError(error);
+    trace.finish("error");
     await notifyMac("Dictionary update failed", message.slice(0, 200));
     process.exitCode = 1;
+  } finally {
+    setActiveVoiceTrace(null);
   }
 }
 
