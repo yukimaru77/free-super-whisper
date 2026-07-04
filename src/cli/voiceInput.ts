@@ -22,6 +22,7 @@ import {
   type VoicePasteTarget,
 } from "../browser/voiceInputRunner.js";
 import { copyToClipboard } from "./clipboard.js";
+import { getWhisperHomeDir } from "../whisperHome.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -243,7 +244,12 @@ export function buildVoiceInputBrowserConfig(
     url: chatgptUrl,
     chatgptUrl,
     manualLogin: true,
-    manualLoginProfileDir: options.profileDir ?? null,
+    // Default to the product's own profile — without this the runner falls
+    // back to oracle's ~/.oracle/browser-profile.
+    manualLoginProfileDir:
+      options.profileDir ??
+      process.env.SUPER_WHISPER_BROWSER_PROFILE_DIR?.trim() ??
+      path.join(getWhisperHomeDir(), "browser-profile"),
     cookieSync: false,
     inputTimeoutMs: options.inputTimeout
       ? parseDuration(options.inputTimeout, 60_000)

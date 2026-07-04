@@ -255,7 +255,7 @@ function buildSendVerifyExpression(): string {
       .filter(Boolean)
       .map((node) => readValue(node).trim());
     const composerEmpty = texts.every((text) => text.length === 0);
-    const onConversation = /\/c\//.test(location.pathname);
+    const onConversation = /\\/c\\//.test(location.pathname);
     const stopVisible = Boolean(document.querySelector('button[data-testid="stop-button"], [data-testid="composer-stop-button"]'));
     return { sent: composerEmpty || onConversation || stopVisible };
   })()`;
