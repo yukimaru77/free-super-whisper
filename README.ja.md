@@ -78,6 +78,21 @@ super-whisper voice status             # 現在の状態を確認
 - `dictationModel` — `Ctrl+Z`(清書)で使うモデル階層。デフォルトは最速の `instant`。
 - `dictionaryModel` — `Ctrl+Shift+Z`(辞書登録の抽出)で使うモデル階層。デフォルトは中間の `thinking`。
 - 指定できる値: `instant` / `thinking` / `medium` / `high` / `extra-high` / `pro`(モデルピッカーの生ラベルも可)。一回だけ変えたいときは `super-whisper voice toggle --model high`。
+- `browserPath` — システムの Chrome の代わりに使う Chromium 系ブラウザ(Edge / Brave / Chromium / Arc など)のバイナリパス。Safari / Firefox は不可(DevTools プロトコルで操縦するため)。
+
+2つのプロンプトと辞書もローカルの普通のファイルです。編集したらコマンド1つで反映できます:
+
+```
+~/.super-whisper/prompts/normalizer.md            # Ctrl+Z の清書プロンプト
+~/.super-whisper/prompts/dictionary-extractor.md  # Ctrl+Shift+Z の抽出プロンプト
+~/.super-whisper/dictionary.txt                   # 1行1エントリ「誤(読み) → 正」
+```
+
+```bash
+super-whisper sync   # ローカルファイルの内容で ChatGPT の両プロジェクトを書き換え
+```
+
+Ctrl+Shift+Z の辞書登録も先に `dictionary.txt` へ追記してからプッシュするので、ローカルと ChatGPT が食い違うことはありません。
 
 ## 補足
 

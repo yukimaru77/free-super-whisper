@@ -16,7 +16,6 @@ import {
   isVoiceSessionUnavailableError,
   readVoiceInputState,
   startBrowserVoiceInput,
-  VOICE_FEEDBACK_INSTRUCTIONS,
   VOICE_FEEDBACK_PROJECT_NAME,
   type VoiceInputState,
   type VoicePasteTarget,
@@ -25,6 +24,7 @@ import { copyToClipboard } from "./clipboard.js";
 import { getWhisperHomeDir } from "../whisperHome.js";
 import { VoiceTrace, setActiveVoiceTrace } from "../voiceObservability.js";
 import { loadWhisperConfig, resolveModelSetting } from "../whisperConfig.js";
+import { getDictionaryPath, getPromptsDir, loadExtractorPrompt } from "../whisperPrompts.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -120,7 +120,7 @@ export async function runVoiceInputCliCommand(
         projectName: feedbackMode ? VOICE_FEEDBACK_PROJECT_NAME : (options.project ?? null),
         replyMode: feedbackMode ? false : Boolean(options.project),
         feedbackMode,
-        projectInstructions: feedbackMode ? VOICE_FEEDBACK_INSTRUCTIONS : null,
+        projectInstructions: feedbackMode ? loadExtractorPrompt() : null,
       });
       trace.event("recording-started", {
         project: result.state.projectName,
@@ -281,6 +281,9 @@ export function buildVoiceInputBrowserConfig(
   return {
     url: chatgptUrl,
     chatgptUrl,
+    // Any Chromium-based browser works (CDP); config.json "browserPath"
+    // switches away from the default system Chrome.
+    chromePath: config.browserPath,
     manualLogin: true,
     // Default to the product's own profile — without this the runner falls
     // back to oracle's ~/.oracle/browser-profile.
@@ -385,6 +388,43 @@ export async function runVoiceFeedbackCollectCommand(
     trace.finish("error");
     await notifyMac("Dictionary update failed", message.slice(0, 200));
     process.exitCode = 1;
+  } finally {
+    setActiveVoiceTrace(null);
+  }
+}
+
+export interface VoiceSyncCliOptions {
+  profileDir?: string;
+  project?: string;
+  verbose?: boolean;
+}
+
+/** `super-whisper sync`: push local prompt/dictionary files to the ChatGPT projects. */
+export async function runVoiceSyncCommand(options: VoiceSyncCliOptions): Promise<void> {
+  const trace = new VoiceTrace("sync");
+  setActiveVoiceTrace(trace);
+  const logger = trace.wrapLogger((message: string) => {
+    if (options.verbose || !message.startsWith("[debug]")) {
+      console.log(chalk.dim(message));
+    }
+  });
+  const { syncVoiceProjectPrompts } = await import("../browser/voiceInputRunner.js");
+  try {
+    await syncVoiceProjectPrompts({
+      config: buildVoiceInputBrowserConfig({
+        profileDir: options.profileDir,
+        project: options.project ?? "Transcript Normalizer",
+      }),
+      log: logger,
+      normalizerProjectName: options.project ?? "Transcript Normalizer",
+    });
+    trace.finish("ok");
+    console.log(chalk.bold("Prompts and dictionary synced to ChatGPT."));
+    console.log(`Edit ${getPromptsDir()}/*.md and ${getDictionaryPath()}, then re-run: super-whisper sync`);
+  } catch (error) {
+    trace.recordError(error);
+    trace.finish("error");
+    throw error;
   } finally {
     setActiveVoiceTrace(null);
   }

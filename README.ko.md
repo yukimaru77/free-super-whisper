@@ -78,6 +78,21 @@ super-whisper voice status             # 현재 상태 확인
 - `dictationModel` — `Ctrl+Z`(다듬기)에 사용하는 모델 티어. 기본값은 가장 빠른 `instant`.
 - `dictionaryModel` — `Ctrl+Shift+Z`(사전 추출)에 사용하는 모델 티어. 기본값은 중간의 `thinking`.
 - 사용 가능한 값: `instant` / `thinking` / `medium` / `high` / `extra-high` / `pro`(모델 선택기의 원시 라벨도 가능). 일회성 변경: `super-whisper voice toggle --model high`.
+- `browserPath` — 시스템 Chrome 대신 사용할 Chromium 계열 브라우저(Edge / Brave / Chromium / Arc 등)의 바이너리 경로. Safari / Firefox는 지원하지 않습니다(DevTools 프로토콜로 브라우저를 구동하기 때문).
+
+두 프롬프트와 사전도 로컬 일반 파일입니다. 편집 후 명령 하나로 반영됩니다:
+
+```
+~/.super-whisper/prompts/normalizer.md            # Ctrl+Z 다듬기 프롬프트
+~/.super-whisper/prompts/dictionary-extractor.md  # Ctrl+Shift+Z 추출 프롬프트
+~/.super-whisper/dictionary.txt                   # 한 줄에 하나 「오인식(읽기) → 정답」
+```
+
+```bash
+super-whisper sync   # 로컬 파일 내용으로 ChatGPT의 두 프로젝트를 다시 씀
+```
+
+Ctrl+Shift+Z 등록도 먼저 `dictionary.txt`에 기록한 뒤 푸시하므로 로컬과 ChatGPT가 어긋나지 않습니다.
 
 ## 참고
 

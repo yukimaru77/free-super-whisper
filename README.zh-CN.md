@@ -78,6 +78,21 @@ super-whisper voice status             # 查看当前状态
 - `dictationModel` — `Ctrl+Z`(润色)使用的模型档位,默认最快的 `instant`。
 - `dictionaryModel` — `Ctrl+Shift+Z`(词典提取)使用的模型档位,默认中档的 `thinking`。
 - 可用值:`instant` / `thinking` / `medium` / `high` / `extra-high` / `pro`(也可填写模型选择器中的原始标签)。临时覆盖:`super-whisper voice toggle --model high`。
+- `browserPath` — 用来代替系统 Chrome 的 Chromium 系浏览器(Edge / Brave / Chromium / Arc 等)的二进制路径。不支持 Safari / Firefox(工具通过 DevTools 协议驱动浏览器)。
+
+两个提示词和你的词典也是本地纯文本文件——编辑后一条命令即可推送:
+
+```
+~/.super-whisper/prompts/normalizer.md            # Ctrl+Z 润色提示词
+~/.super-whisper/prompts/dictionary-extractor.md  # Ctrl+Shift+Z 提取提示词
+~/.super-whisper/dictionary.txt                   # 每行一条「误(读音) → 正确」
+```
+
+```bash
+super-whisper sync   # 用本地文件重写两个 ChatGPT 项目
+```
+
+Ctrl+Shift+Z 也会先写入 `dictionary.txt` 再推送,本地与 ChatGPT 永不偏离。
 
 ## 备注
 

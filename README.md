@@ -78,6 +78,21 @@ super-whisper voice status             # current session state
 - `dictationModel` — model tier for the `Ctrl+Z` cleanup (default: the fastest, `instant`).
 - `dictionaryModel` — model tier for the `Ctrl+Shift+Z` correction extraction (default: `thinking`, the mid tier).
 - Accepted values: `instant` / `thinking` / `medium` / `high` / `extra-high` / `pro` (or any raw label from the model picker). One-off override: `super-whisper voice toggle --model high`.
+- `browserPath` — path to a Chromium-based browser binary (Edge / Brave / Chromium / Arc …) to use instead of the system Chrome. Safari/Firefox are not supported (the tool drives the browser over the DevTools protocol).
+
+The two prompts and your dictionary are also plain local files — edit them, then push with one command:
+
+```
+~/.super-whisper/prompts/normalizer.md            # Ctrl+Z cleanup prompt
+~/.super-whisper/prompts/dictionary-extractor.md  # Ctrl+Shift+Z extraction prompt
+~/.super-whisper/dictionary.txt                   # one "wrong(reading) → correct" per line
+```
+
+```bash
+super-whisper sync   # rewrites both ChatGPT projects from the local files
+```
+
+Ctrl+Shift+Z also appends to `dictionary.txt` first, so the local files and ChatGPT never diverge.
 
 ## Notes
 

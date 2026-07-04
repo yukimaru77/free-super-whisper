@@ -20,11 +20,14 @@ import { getWhisperHomeDir } from "./whisperHome.js";
 export interface WhisperConfig {
   dictationModel: string;
   dictionaryModel: string;
+  /** Path to a Chromium-based browser binary (Chrome/Edge/Brave/Arc…); null = system Chrome. */
+  browserPath: string | null;
 }
 
 const DEFAULT_CONFIG: WhisperConfig = {
   dictationModel: "instant",
   dictionaryModel: "thinking",
+  browserPath: null,
 };
 
 export function getWhisperConfigPath(): string {
@@ -45,6 +48,10 @@ export function loadWhisperConfig(): WhisperConfig {
         typeof parsed.dictionaryModel === "string" && parsed.dictionaryModel.trim()
           ? parsed.dictionaryModel.trim()
           : DEFAULT_CONFIG.dictionaryModel,
+      browserPath:
+        typeof parsed.browserPath === "string" && parsed.browserPath.trim()
+          ? parsed.browserPath.trim()
+          : null,
     };
   } catch {
     try {

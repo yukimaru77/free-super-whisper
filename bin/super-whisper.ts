@@ -98,6 +98,19 @@ program
   });
 
 program
+  .command("sync")
+  .description(
+    "Push the local prompts (~/.super-whisper/prompts/*.md) and dictionary (~/.super-whisper/dictionary.txt) to the ChatGPT projects.",
+  )
+  .option("--project <name>", "Normalizer project name.", "Transcript Normalizer")
+  .option("--profile-dir <path>", "Persistent Chrome profile directory override.")
+  .option("-v, --verbose", "Enable verbose browser logging.", false)
+  .action(async function (this: Command) {
+    const { runVoiceSyncCommand } = await import("../src/cli/voiceInput.js");
+    await runVoiceSyncCommand(this.opts() as Parameters<typeof runVoiceSyncCommand>[0]);
+  });
+
+program
   .command("login")
   .description(
     "First-run setup: open Chrome with the super-whisper profile on chatgpt.com and wait for sign-in.",

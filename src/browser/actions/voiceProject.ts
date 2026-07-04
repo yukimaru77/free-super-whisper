@@ -347,23 +347,33 @@ export async function setProjectInstructions(
     throw new Error("Project instructions did not stick in the settings textarea.");
   }
   // A "Save" button only appears once the form is dirty; closing without
-  // saving discards the value.
-  await clickByLabel(runtime, {
-    include: [...SAVE_LABELS],
-    exclude: ["cancel", "キャンセル", "取消", "취소", "cancelar", "annuler", "abbrechen", "отмена", ...DELETE_WORDS],
-    scope: "dialog",
-    timeoutMs: 10_000,
-    description: "project settings save button",
-  });
-  await delay(800);
-  await clickByLabel(runtime, {
-    include: [...CLOSE_LABELS],
-    exclude: [...DELETE_WORDS],
-    scope: "dialog",
-    timeoutMs: 3_000,
-    description: "project settings close button",
-  }).catch(() => undefined);
-  logger("[voice] Project instructions saved.");
+  // saving discards the value. When the typed text is IDENTICAL to what was
+  // already stored, the form never becomes dirty and no Save exists — that
+  // is success, not failure (hit by `super-whisper sync` re-pushes).
+  try {
+    await clickByLabel(runtime, {
+      include: [...SAVE_LABELS],
+      exclude: ["cancel", "キャンセル", "取消", "취소", "cancelar", "annuler", "abbrechen", "отмена", ...DELETE_WORDS],
+      scope: "dialog",
+      timeoutMs: 10_000,
+      description: "project settings save button",
+    });
+    await delay(800);
+    logger("[voice] Project instructions saved.");
+  } catch (error) {
+    const unchanged = await runtime.evaluate({
+      expression: `(() => {
+        const ta = document.querySelector('[role="dialog"] textarea, dialog textarea');
+        return ta ? ta.value.trim() === ${JSON.stringify(instructions.trim())} : false;
+      })()`,
+      returnByValue: true,
+    });
+    if (unchanged.result?.value !== true) {
+      throw error;
+    }
+    logger("[voice] Project instructions already up to date; nothing to save.");
+  }
+  await closeSettingsDialog(runtime);
 }
 
 export const PROJECT_DICTIONARY_HEADER = "## User dictionary";

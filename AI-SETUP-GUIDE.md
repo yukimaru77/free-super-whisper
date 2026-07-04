@@ -165,6 +165,12 @@ that steals the user's focus. Real keystrokes only where noted.
   osascript System Events often fails without Automation grants). At finish,
   activate with `open -b <bundleId>` and send Cmd+V via
   osascript System Events keystroke (needs Accessibility, see step 4).
+- The prompts and the user dictionary are LOCAL FILES (source of truth):
+  ~/.super-whisper/prompts/normalizer.md, prompts/dictionary-extractor.md,
+  dictionary.txt. `super-whisper sync` pushes them to both projects
+  (src/whisperPrompts.ts composes; identical content = "nothing to save" is
+  success, not an error). The feedback collector appends locally FIRST,
+  then pushes the recomposed instructions.
 - Per-feature model tiers come from ~/.super-whisper/config.json
   (dictationModel / dictionaryModel; defaults instant / thinking→Medium),
   resolved in src/whisperConfig.ts; --model overrides per invocation.

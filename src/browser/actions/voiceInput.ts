@@ -54,7 +54,7 @@ export async function dismissOnboardingBubbles(
   const result = await Runtime.evaluate({
     expression: `(() => {
       ${buildClickDispatcher()}
-      const texts = ['got it', '知道了', '明白了', 'わかりました', '了解しました', '알겠습니다', 'entendido', 'compris', 'verstanden', 'entendi', 'понятно'];
+      const texts = ['got it', '知道了', '明白了', 'わかりました', '了解しました', '了解', 'ok', '알겠습니다', '확인', 'entendido', 'compris', 'verstanden', 'entendi', 'понятно'];
       let dismissed = 0;
       for (const btn of Array.from(document.querySelectorAll('button'))) {
         if (!(btn instanceof HTMLElement) || !btn.offsetParent) continue;
