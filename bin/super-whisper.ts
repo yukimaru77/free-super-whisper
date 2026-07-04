@@ -35,6 +35,10 @@ function addVoiceInputOptions(command: Command): Command {
     )
     .option("--no-clear", "Do not clear the transcribed text from the ChatGPT message field.")
     .option("--reply-timeout <duration>", "Timeout waiting for the ChatGPT reply (project mode).")
+    .option(
+      "--model <tier>",
+      "One-off model override: instant | thinking | medium | high | extra-high | pro (default from ~/.super-whisper/config.json).",
+    )
     .option("--chatgpt-url <url>", "ChatGPT URL to open (default https://chatgpt.com/).")
     .option("--profile-dir <path>", "Persistent Chrome profile directory override.")
     .option("--force", "Replace a stale active voice session on start.", false)

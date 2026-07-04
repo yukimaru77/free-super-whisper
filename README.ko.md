@@ -64,6 +64,21 @@ super-whisper login                    # ChatGPT(재)로그인
 super-whisper voice status             # 현재 상태 확인
 ```
 
+## 설정
+
+`~/.super-whisper/config.json`(첫 실행 시 자동 생성):
+
+```json
+{
+  "dictationModel": "instant",
+  "dictionaryModel": "thinking"
+}
+```
+
+- `dictationModel` — `Ctrl+Z`(다듬기)에 사용하는 모델 티어. 기본값은 가장 빠른 `instant`.
+- `dictionaryModel` — `Ctrl+Shift+Z`(사전 추출)에 사용하는 모델 티어. 기본값은 중간의 `thinking`.
+- 사용 가능한 값: `instant` / `thinking` / `medium` / `high` / `extra-high` / `pro`(모델 선택기의 원시 라벨도 가능). 일회성 변경: `super-whisper voice toggle --model high`.
+
 ## 참고
 
 - macOS 전용(붙여넣기·앱 감지에 macOS 기능 사용).

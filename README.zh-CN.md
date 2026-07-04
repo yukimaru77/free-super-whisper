@@ -64,6 +64,21 @@ super-whisper login                    # (重新)登录 ChatGPT
 super-whisper voice status             # 查看当前状态
 ```
 
+## 配置
+
+`~/.super-whisper/config.json`(首次运行时自动生成):
+
+```json
+{
+  "dictationModel": "instant",
+  "dictionaryModel": "thinking"
+}
+```
+
+- `dictationModel` — `Ctrl+Z`(润色)使用的模型档位,默认最快的 `instant`。
+- `dictionaryModel` — `Ctrl+Shift+Z`(词典提取)使用的模型档位,默认中档的 `thinking`。
+- 可用值:`instant` / `thinking` / `medium` / `high` / `extra-high` / `pro`(也可填写模型选择器中的原始标签)。临时覆盖:`super-whisper voice toggle --model high`。
+
 ## 备注
 
 - 仅支持 macOS(粘贴与应用检测使用 macOS 机制)。

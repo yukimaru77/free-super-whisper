@@ -64,6 +64,21 @@ super-whisper login                    # (re-)sign in to ChatGPT
 super-whisper voice status             # current session state
 ```
 
+## Configuration
+
+`~/.super-whisper/config.json` (created automatically on first run):
+
+```json
+{
+  "dictationModel": "instant",
+  "dictionaryModel": "thinking"
+}
+```
+
+- `dictationModel` — model tier for the `Ctrl+Z` cleanup (default: the fastest, `instant`).
+- `dictionaryModel` — model tier for the `Ctrl+Shift+Z` correction extraction (default: `thinking`, the mid tier).
+- Accepted values: `instant` / `thinking` / `medium` / `high` / `extra-high` / `pro` (or any raw label from the model picker). One-off override: `super-whisper voice toggle --model high`.
+
 ## Notes
 
 - macOS only (paste-back and app detection use macOS facilities).

@@ -24,6 +24,7 @@ import {
 import { copyToClipboard } from "./clipboard.js";
 import { getWhisperHomeDir } from "../whisperHome.js";
 import { VoiceTrace, setActiveVoiceTrace } from "../voiceObservability.js";
+import { loadWhisperConfig, resolveModelSetting } from "../whisperConfig.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -48,6 +49,8 @@ export interface VoiceInputCliOptions {
   replyTimeout?: string;
   /** Correction-feedback mode: dictate corrections for the user dictionary. */
   feedback?: boolean;
+  /** One-off model override (otherwise ~/.super-whisper/config.json decides). */
+  model?: string;
 }
 
 export async function runVoiceInputCliCommand(
@@ -265,6 +268,16 @@ export function buildVoiceInputBrowserConfig(
   const chatgptUrl = options.chatgptUrl ?? CHATGPT_URL;
   const projectMode = Boolean(options.project);
   const feedbackMode = Boolean(options.feedback);
+  // Model per feature from ~/.super-whisper/config.json (defaults: dictation
+  // "instant", dictionary "thinking" = the mid Medium tier); --model wins.
+  const config = loadWhisperConfig();
+  const desiredModel = options.model?.trim()
+    ? resolveModelSetting(options.model)
+    : feedbackMode
+      ? resolveModelSetting(config.dictionaryModel)
+      : projectMode
+        ? resolveModelSetting(config.dictationModel)
+        : null;
   return {
     url: chatgptUrl,
     chatgptUrl,
@@ -279,11 +292,8 @@ export function buildVoiceInputBrowserConfig(
     inputTimeoutMs: options.inputTimeout
       ? parseDuration(options.inputTimeout, 60_000)
       : undefined,
-    // The composer pill on current ChatGPT lists effort tiers ("Instant",
-    // "Medium", "High", ...); "Instant" is the lightest. Feedback extraction
-    // gets the mid "thinking" tier — it must reason about spoken corrections.
-    desiredModel: feedbackMode ? "Medium" : projectMode ? "Instant" : null,
-    modelStrategy: feedbackMode || projectMode ? "select" : "ignore",
+    desiredModel,
+    modelStrategy: desiredModel ? "select" : "ignore",
     researchMode: "off",
     archiveConversations: "never",
   };

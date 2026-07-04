@@ -165,6 +165,9 @@ that steals the user's focus. Real keystrokes only where noted.
   osascript System Events often fails without Automation grants). At finish,
   activate with `open -b <bundleId>` and send Cmd+V via
   osascript System Events keystroke (needs Accessibility, see step 4).
+- Per-feature model tiers come from ~/.super-whisper/config.json
+  (dictationModel / dictionaryModel; defaults instant / thinking→Medium),
+  resolved in src/whisperConfig.ts; --model overrides per invocation.
 - Concurrency: hotkey presses that arrive while another voice command is
   running are DROPPED, not queued (toggle gives up on the lock after 1.5s).
   This matters: a queued toggle once fired as "finish" the instant a slow
