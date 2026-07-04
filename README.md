@@ -7,7 +7,12 @@
 </p>
 
 
-Voice dictation tool for macOS. Press a hotkey, speak, press it again — and a polished version of what you said is pasted at your cursor. Transcription and cleanup are done by driving your own ChatGPT (web) in a background Chrome tab, so there are no API keys and no extra costs.
+Two hotkeys:
+
+- **`Ctrl+Z`** — speak, and a **polished written version** of what you said is pasted at your cursor.
+- **`Ctrl+Shift+Z`** — when the cleanup got something wrong, **say the correction** — it is learned and never repeated.
+
+macOS only. Free: it drives your own ChatGPT (web) in a background Chrome tab — no API keys, no extra costs.
 
 ## Features
 
