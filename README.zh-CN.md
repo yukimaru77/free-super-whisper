@@ -64,3 +64,13 @@ super-whisper voice status             # 查看当前状态
 - ChatGPT 界面标签通过多语言词典匹配 — 英语、日语、简体中文、繁体中文(台/港)、韩语、俄语均经实测,其他语言有基于位置的回退方案。
 - 日志:`/tmp/super-whisper-toggle.log`(词典:`/tmp/super-whisper-feedback.log`)。
 - 本仓库直接构建在 [oracle](https://github.com/steipete/oracle) 之上 — 即 oracle 代码库加上一层最小的语音功能([上游 README](README.oracle.md))。所有浏览器自动化均为 oracle 久经考验的原生代码。
+## 致谢
+
+本项目建立在 [Peter Steinberger](https://github.com/steipete) 的
+[**oracle**](https://github.com/steipete/oracle) 之上。这个工具里所有困难的
+部分——Chrome 的启动与管理、持久登录配置文件、Cookie 处理、ChatGPT 页面
+自动化、配置文件锁——都是 oracle 的代码;我们只是在其上添加了一层轻薄的
+语音输入层。如果这个工具足够可靠,那份可靠是继承来的。谢谢。
+
+MIT 许可([LICENSE](LICENSE)):oracle © Peter Steinberger,
+语音层 © yukimaru77。

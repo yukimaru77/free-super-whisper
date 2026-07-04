@@ -64,3 +64,15 @@ super-whisper voice status             # 現在の状態を確認
 - ChatGPT の UI ラベルは多言語辞書で照合(英・日・簡体中・繁体中(台/香)・韓・露は実測済み。その他の言語も位置ベースのフォールバックで動作)。
 - ログ: `/tmp/super-whisper-toggle.log`(辞書登録は `/tmp/super-whisper-feedback.log`)。
 - 本リポジトリは [oracle](https://github.com/steipete/oracle) のコードベースそのものに、最小限の音声レイヤーを接ぎ木したものです([本家 README](README.oracle.md))。ブラウザ自動化(Chrome の起動・プロファイル・ChatGPT 操作)はすべて oracle 本家の実績あるコードです。
+## 謝辞
+
+本プロジェクトは [Peter Steinberger](https://github.com/steipete) 氏の
+[**oracle**](https://github.com/steipete/oracle) の上に成り立っています。
+このツールの難しい部分——Chrome の起動と管理、サインイン済み永続プロファイル、
+Cookie の扱い、ChatGPT のページ自動化、プロファイルのロック——はすべて
+oracle のコードであり、私たちが書いたのは薄い音声入力レイヤーだけです。
+このツールが安定して動くなら、その安定性は oracle から受け継いだものです。
+ありがとうございます。
+
+ライセンスは MIT([LICENSE](LICENSE))。oracle © Peter Steinberger、
+音声レイヤー © yukimaru77。

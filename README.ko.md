@@ -64,3 +64,14 @@ super-whisper voice status             # 현재 상태 확인
 - ChatGPT UI 라벨은 다국어 사전으로 매칭 — 영어·일본어·중국어 간체·번체(대만/홍콩)·한국어·러시아어는 실측 검증됨, 그 외 언어는 위치 기반 폴백으로 동작합니다.
 - 로그: `/tmp/super-whisper-toggle.log`(사전: `/tmp/super-whisper-feedback.log`).
 - 이 저장소는 [oracle](https://github.com/steipete/oracle) 코드베이스 위에 최소한의 음성 레이어를 얹은 것입니다([업스트림 README](README.oracle.md)). 모든 브라우저 자동화는 oracle의 검증된 코드입니다.
+## 감사의 말
+
+이 프로젝트는 [Peter Steinberger](https://github.com/steipete)의
+[**oracle**](https://github.com/steipete/oracle) 위에 서 있습니다. 이 도구의
+어려운 부분 전부 — Chrome 실행과 관리, 로그인 유지 프로필, 쿠키 처리,
+ChatGPT 페이지 자동화, 프로필 잠금 — 는 oracle의 코드이고, 우리는 그 위에
+얇은 음성 입력 레이어를 더했을 뿐입니다. 이 도구가 안정적이라면 그 안정성은
+물려받은 것입니다. 감사합니다.
+
+MIT 라이선스([LICENSE](LICENSE)): oracle © Peter Steinberger,
+음성 레이어 © yukimaru77.

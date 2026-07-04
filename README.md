@@ -64,3 +64,14 @@ super-whisper voice status             # current session state
 - ChatGPT UI labels are matched via a multilingual dictionary — live-verified for English, Japanese, Simplified Chinese, Traditional Chinese (TW/HK), Korean, and Russian, with position-based fallbacks for other locales.
 - Logs: `/tmp/super-whisper-toggle.log` (dictionary: `/tmp/super-whisper-feedback.log`).
 - Built directly on top of [oracle](https://github.com/steipete/oracle) — this repo is the oracle codebase with a minimal voice layer grafted on ([upstream README](README.oracle.md)). All browser automation (Chrome lifecycle, profiles, ChatGPT page actions) is oracle's own, battle-tested code.
+## Acknowledgements
+
+This project stands on [**oracle**](https://github.com/steipete/oracle) by
+[Peter Steinberger](https://github.com/steipete). Everything hard in here —
+launching and managing Chrome, persistent signed-in profiles, cookie
+handling, the ChatGPT page automation, profile locking — is oracle's code,
+not ours. We added a thin voice-dictation layer on top. If this tool is
+reliable, that reliability is inherited. Thank you.
+
+Licensed under MIT (see [LICENSE](LICENSE)): oracle © Peter Steinberger,
+voice layer © yukimaru77.
