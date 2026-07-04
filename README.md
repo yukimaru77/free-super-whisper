@@ -45,6 +45,8 @@ If the tool later breaks because ChatGPT's UI changed, hand the same guide to an
 | Action | Result |
 |---|---|
 | `Ctrl+Z` → speak → `Ctrl+Z` | Polished text is pasted at your cursor |
+
+> Note: only the first press after a reboot takes a little longer (it launches the background Chrome). After that the tab stays warm and recording starts in a couple of seconds.
 | `Ctrl+Shift+Z` → describe a correction → `Ctrl+Shift+Z` | `wrong → correct` is added to your dictionary |
 
 CLI:
