@@ -93,7 +93,9 @@ func pillOrigin() -> NSPoint {
     }
     if let win = focusedWindowRect() {
         logLine("source=window rect=" + String(describing: win))
-        return NSPoint(x: win.maxX - width - 16, y: win.maxY - height - 10)
+        // Bottom-left of the focused window: near where text usually flows,
+        // without covering the title bar or trafficlights.
+        return NSPoint(x: win.minX + 16, y: win.minY + 12)
     }
     logLine("source=screen fallback")
     return NSPoint(x: screen.maxX - width - 16, y: screen.maxY - height - 10)
@@ -157,7 +159,7 @@ app.run()
 `;
 
 function getHudBinaryPath(): string {
-  return path.join(getWhisperHomeDir(), "bin", "super-whisper-hud-v5");
+  return path.join(getWhisperHomeDir(), "bin", "super-whisper-hud-v6");
 }
 
 function getHudPidPath(): string {
@@ -176,7 +178,7 @@ async function ensureHudBinary(logger: (message: string) => void): Promise<strin
   }
   try {
     mkdirSync(path.dirname(binary), { recursive: true });
-    const source = path.join(getWhisperHomeDir(), "bin", "super-whisper-hud-v5.swift");
+    const source = path.join(getWhisperHomeDir(), "bin", "super-whisper-hud-v6.swift");
     writeFileSync(source, HUD_SOURCE);
     logger("[voice] Building the recording indicator (one-time, a few seconds)...");
     await execFileAsync("swiftc", ["-O", source, "-o", binary], { timeout: 120_000 });
