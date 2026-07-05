@@ -96,7 +96,7 @@ Ctrl+Shift+Z also appends to `dictionary.txt` first, so the local files and Chat
 
 ## Notes
 
-- While recording, a red pill (🎙) floats at the top-right of the screen so you always know the mic is live. It disappears the moment you stop.
+- A floating pill at the top-right shows every stage: amber "starting" when you press the hotkey, a pulsing red 🎙 while the mic is live, amber "processing" after the second press, gone when the text lands.
 - macOS only (paste-back and app detection use macOS facilities).
 - All state lives under `~/.super-whisper/`. Delete it for a full reset.
 - ChatGPT UI labels are matched via a multilingual dictionary — live-verified for English, Japanese, Simplified Chinese, Traditional Chinese (TW/HK), Korean, and Russian, with position-based fallbacks for other locales.

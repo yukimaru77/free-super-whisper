@@ -111,6 +111,11 @@ export async function runVoiceInputCliCommand(
     }
 
     const runStart = async (force: boolean): Promise<void> => {
+      await showRecordingIndicator(
+        feedbackMode ? "⏳ 起動中… (辞書)" : "⏳ 起動中…",
+        logger,
+        "amber",
+      );
       const browserConfig = buildVoiceInputBrowserConfig(options);
       const result = await startBrowserVoiceInput({
         config: browserConfig,
@@ -148,7 +153,11 @@ export async function runVoiceInputCliCommand(
     }
 
     if (action === "finish") {
-      await hideRecordingIndicator();
+      await showRecordingIndicator(
+        feedbackMode ? "⏳ 登録中…" : "⏳ 清書中…",
+        logger,
+        "amber",
+      );
       const timeoutMs = options.inputTimeout
         ? parseDuration(options.inputTimeout, 30_000)
         : undefined;
@@ -205,6 +214,7 @@ export async function runVoiceInputCliCommand(
         pasted,
         conversationUrl: result.conversationUrl ?? null,
       });
+      await hideRecordingIndicator();
       if (feedbackMode) {
         if (result.conversationUrl) {
           spawnFeedbackCollector(result.state, result.conversationUrl, options, logger);

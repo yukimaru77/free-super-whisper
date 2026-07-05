@@ -21,6 +21,7 @@ let app = NSApplication.shared
 app.setActivationPolicy(.accessory)
 
 let text = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "🎙 REC"
+let colorName = CommandLine.arguments.count > 2 ? CommandLine.arguments[2] : "red"
 
 let tf = NSTextField(labelWithString: text)
 tf.textColor = .white
@@ -44,18 +45,24 @@ panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
 
 let bg = NSView(frame: NSRect(x: 0, y: 0, width: width, height: height))
 bg.wantsLayer = true
-bg.layer?.backgroundColor = NSColor(calibratedRed: 0.86, green: 0.12, blue: 0.16, alpha: 0.93).cgColor
+let pillColor = colorName == "amber"
+    ? NSColor(calibratedRed: 0.95, green: 0.55, blue: 0.05, alpha: 0.93)
+    : NSColor(calibratedRed: 0.86, green: 0.12, blue: 0.16, alpha: 0.93)
+bg.layer?.backgroundColor = pillColor.cgColor
 bg.layer?.cornerRadius = height / 2
 tf.frame.origin = NSPoint(x: padH, y: padV)
 bg.addSubview(tf)
 panel.contentView = bg
 panel.orderFrontRegardless()
 
-// Gentle pulse so "recording" reads as live, not stuck.
-var visible = true
-Timer.scheduledTimer(withTimeInterval: 0.9, repeats: true) { _ in
-    visible.toggle()
-    panel.animator().alphaValue = visible ? 1.0 : 0.55
+// Gentle pulse so "recording" reads as live, not stuck. The amber
+// "working" pill stays steady so the two states look different.
+if colorName != "amber" {
+    var visible = true
+    Timer.scheduledTimer(withTimeInterval: 0.9, repeats: true) { _ in
+        visible.toggle()
+        panel.animator().alphaValue = visible ? 1.0 : 0.55
+    }
 }
 
 // Crash safety: never outlive a plausible recording session.
@@ -66,7 +73,7 @@ app.run()
 `;
 
 function getHudBinaryPath(): string {
-  return path.join(getWhisperHomeDir(), "bin", "super-whisper-hud");
+  return path.join(getWhisperHomeDir(), "bin", "super-whisper-hud-v2");
 }
 
 function getHudPidPath(): string {
@@ -85,7 +92,7 @@ async function ensureHudBinary(logger: (message: string) => void): Promise<strin
   }
   try {
     mkdirSync(path.dirname(binary), { recursive: true });
-    const source = path.join(getWhisperHomeDir(), "bin", "super-whisper-hud.swift");
+    const source = path.join(getWhisperHomeDir(), "bin", "super-whisper-hud-v2.swift");
     writeFileSync(source, HUD_SOURCE);
     logger("[voice] Building the recording indicator (one-time, a few seconds)...");
     await execFileAsync("swiftc", ["-O", source, "-o", binary], { timeout: 120_000 });
@@ -100,13 +107,14 @@ async function ensureHudBinary(logger: (message: string) => void): Promise<strin
 export async function showRecordingIndicator(
   label: string,
   logger: (message: string) => void,
+  color: "red" | "amber" = "red",
 ): Promise<void> {
   if (process.platform !== "darwin") return;
   try {
     await hideRecordingIndicator(); // never stack two pills
     const binary = await ensureHudBinary(logger);
     if (binary) {
-      const child = spawn(binary, [label], { detached: true, stdio: "ignore" });
+      const child = spawn(binary, [label, color], { detached: true, stdio: "ignore" });
       child.unref();
       if (child.pid) {
         writeFileSync(getHudPidPath(), String(child.pid));
