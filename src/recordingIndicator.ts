@@ -54,8 +54,15 @@ func caretRect() -> NSRect? {
           let boundsAny = boundsRef, CFGetTypeID(boundsAny) == AXValueGetTypeID() else { return nil }
     var r = CGRect.zero
     guard AXValueGetValue(boundsAny as! AXValue, .cgRect, &r) else { return nil }
-    if r.width == 0 && r.height == 0 && r.origin.x == 0 && r.origin.y == 0 { return nil }
-    return axToAppKit(r)
+    // Some fields answer .success with garbage (all zeros, or a zero-height
+    // rect at the screen origin). A real caret has a plausible line height
+    // and sits inside an actual screen.
+    guard r.height >= 6, r.height <= 80 else { return nil }
+    guard r.origin.x != 0 || r.origin.y != 0 else { return nil }
+    let converted = axToAppKit(r)
+    let onSomeScreen = NSScreen.screens.contains { $0.frame.insetBy(dx: -4, dy: -4).contains(NSPoint(x: converted.midX, y: converted.midY)) }
+    guard onSomeScreen else { return nil }
+    return converted
 }
 func focusedWindowRect() -> NSRect? {
     let systemWide = AXUIElementCreateSystemWide()
@@ -73,13 +80,22 @@ func focusedWindowRect() -> NSRect? {
     guard AXValueGetValue(posRef as! AXValue, .cgPoint, &pos), AXValueGetValue(sizeRef as! AXValue, .cgSize, &size) else { return nil }
     return axToAppKit(CGRect(origin: pos, size: size))
 }
+let hudLog = FileHandle(forWritingAtPath: NSString(string: "~/.super-whisper/logs/hud.log").expandingTildeInPath)
+func logLine(_ message: String) {
+    let line = ISO8601DateFormatter().string(from: Date()) + " " + message + "\\n"
+    if let handle = hudLog { handle.seekToEndOfFile(); handle.write(line.data(using: .utf8)!) }
+    else { try? line.write(toFile: NSString(string: "~/.super-whisper/logs/hud.log").expandingTildeInPath, atomically: false, encoding: .utf8) }
+}
 func pillOrigin() -> NSPoint {
     if let caret = caretRect() {
+        logLine("source=caret rect=" + String(describing: caret))
         return NSPoint(x: caret.maxX + 10, y: caret.maxY + 8)
     }
     if let win = focusedWindowRect() {
+        logLine("source=window rect=" + String(describing: win))
         return NSPoint(x: win.maxX - width - 16, y: win.maxY - height - 10)
     }
+    logLine("source=screen fallback")
     return NSPoint(x: screen.maxX - width - 16, y: screen.maxY - height - 10)
 }
 func clamped(_ p: NSPoint) -> NSPoint {
@@ -141,7 +157,7 @@ app.run()
 `;
 
 function getHudBinaryPath(): string {
-  return path.join(getWhisperHomeDir(), "bin", "super-whisper-hud-v3");
+  return path.join(getWhisperHomeDir(), "bin", "super-whisper-hud-v5");
 }
 
 function getHudPidPath(): string {
@@ -160,7 +176,7 @@ async function ensureHudBinary(logger: (message: string) => void): Promise<strin
   }
   try {
     mkdirSync(path.dirname(binary), { recursive: true });
-    const source = path.join(getWhisperHomeDir(), "bin", "super-whisper-hud-v3.swift");
+    const source = path.join(getWhisperHomeDir(), "bin", "super-whisper-hud-v5.swift");
     writeFileSync(source, HUD_SOURCE);
     logger("[voice] Building the recording indicator (one-time, a few seconds)...");
     await execFileAsync("swiftc", ["-O", source, "-o", binary], { timeout: 120_000 });
