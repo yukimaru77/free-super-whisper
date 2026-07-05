@@ -32,7 +32,66 @@ let padH: CGFloat = 14, padV: CGFloat = 7
 let width = tf.frame.width + padH * 2
 let height = tf.frame.height + padV * 2
 let screen = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1280, height: 800)
-let rect = NSRect(x: screen.maxX - width - 16, y: screen.maxY - height - 10, width: width, height: height)
+
+// Position: just above-right of the text caret in the focused field (via the
+// Accessibility API). Fallbacks: focused window's top-right, then screen
+// top-right. AX coordinates are top-left-origin; AppKit wants bottom-left.
+func axToAppKit(_ r: CGRect) -> NSRect {
+    let full = NSScreen.screens.first?.frame ?? NSRect(x: 0, y: 0, width: 1280, height: 800)
+    return NSRect(x: r.origin.x, y: full.maxY - r.origin.y - r.height, width: r.width, height: r.height)
+}
+func caretRect() -> NSRect? {
+    let systemWide = AXUIElementCreateSystemWide()
+    var focusedRef: AnyObject?
+    guard AXUIElementCopyAttributeValue(systemWide, kAXFocusedUIElementAttribute as CFString, &focusedRef) == .success,
+          let focusedAny = focusedRef, CFGetTypeID(focusedAny) == AXUIElementGetTypeID() else { return nil }
+    let focused = focusedAny as! AXUIElement
+    var rangeRef: AnyObject?
+    guard AXUIElementCopyAttributeValue(focused, kAXSelectedTextRangeAttribute as CFString, &rangeRef) == .success,
+          let range = rangeRef else { return nil }
+    var boundsRef: AnyObject?
+    guard AXUIElementCopyParameterizedAttributeValue(focused, kAXBoundsForRangeParameterizedAttribute as CFString, range, &boundsRef) == .success,
+          let boundsAny = boundsRef, CFGetTypeID(boundsAny) == AXValueGetTypeID() else { return nil }
+    var r = CGRect.zero
+    guard AXValueGetValue(boundsAny as! AXValue, .cgRect, &r) else { return nil }
+    if r.width == 0 && r.height == 0 && r.origin.x == 0 && r.origin.y == 0 { return nil }
+    return axToAppKit(r)
+}
+func focusedWindowRect() -> NSRect? {
+    let systemWide = AXUIElementCreateSystemWide()
+    var appRef: AnyObject?
+    guard AXUIElementCopyAttributeValue(systemWide, kAXFocusedApplicationAttribute as CFString, &appRef) == .success,
+          let appAny = appRef, CFGetTypeID(appAny) == AXUIElementGetTypeID() else { return nil }
+    var winRef: AnyObject?
+    guard AXUIElementCopyAttributeValue(appAny as! AXUIElement, kAXFocusedWindowAttribute as CFString, &winRef) == .success,
+          let winAny = winRef, CFGetTypeID(winAny) == AXUIElementGetTypeID() else { return nil }
+    let win = winAny as! AXUIElement
+    var posRef: AnyObject?, sizeRef: AnyObject?
+    guard AXUIElementCopyAttributeValue(win, kAXPositionAttribute as CFString, &posRef) == .success,
+          AXUIElementCopyAttributeValue(win, kAXSizeAttribute as CFString, &sizeRef) == .success else { return nil }
+    var pos = CGPoint.zero, size = CGSize.zero
+    guard AXValueGetValue(posRef as! AXValue, .cgPoint, &pos), AXValueGetValue(sizeRef as! AXValue, .cgSize, &size) else { return nil }
+    return axToAppKit(CGRect(origin: pos, size: size))
+}
+func pillOrigin() -> NSPoint {
+    if let caret = caretRect() {
+        return NSPoint(x: caret.maxX + 10, y: caret.maxY + 8)
+    }
+    if let win = focusedWindowRect() {
+        return NSPoint(x: win.maxX - width - 16, y: win.maxY - height - 10)
+    }
+    return NSPoint(x: screen.maxX - width - 16, y: screen.maxY - height - 10)
+}
+func clamped(_ p: NSPoint) -> NSPoint {
+    var x = p.x, y = p.y
+    if x + width > screen.maxX - 4 { x = screen.maxX - width - 4 }
+    if x < screen.minX + 4 { x = screen.minX + 4 }
+    if y + height > screen.maxY - 4 { y = p.y - height - 40 }
+    if y < screen.minY + 4 { y = screen.minY + 4 }
+    return NSPoint(x: x, y: y)
+}
+let origin = clamped(pillOrigin())
+let rect = NSRect(x: origin.x, y: origin.y, width: width, height: height)
 
 let panel = NSPanel(contentRect: rect, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
 panel.level = .statusBar
@@ -65,6 +124,15 @@ if colorName != "amber" {
     }
 }
 
+// Follow the caret if it moves (throttled; jumps only on real change).
+Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { _ in
+    let next = clamped(pillOrigin())
+    let current = panel.frame.origin
+    if abs(next.x - current.x) > 24 || abs(next.y - current.y) > 24 {
+        panel.setFrameOrigin(next)
+    }
+}
+
 // Crash safety: never outlive a plausible recording session.
 DispatchQueue.main.asyncAfter(deadline: .now() + 900) { exit(0) }
 signal(SIGTERM) { _ in exit(0) }
@@ -73,7 +141,7 @@ app.run()
 `;
 
 function getHudBinaryPath(): string {
-  return path.join(getWhisperHomeDir(), "bin", "super-whisper-hud-v2");
+  return path.join(getWhisperHomeDir(), "bin", "super-whisper-hud-v3");
 }
 
 function getHudPidPath(): string {
@@ -92,7 +160,7 @@ async function ensureHudBinary(logger: (message: string) => void): Promise<strin
   }
   try {
     mkdirSync(path.dirname(binary), { recursive: true });
-    const source = path.join(getWhisperHomeDir(), "bin", "super-whisper-hud-v2.swift");
+    const source = path.join(getWhisperHomeDir(), "bin", "super-whisper-hud-v3.swift");
     writeFileSync(source, HUD_SOURCE);
     logger("[voice] Building the recording indicator (one-time, a few seconds)...");
     await execFileAsync("swiftc", ["-O", source, "-o", binary], { timeout: 120_000 });
