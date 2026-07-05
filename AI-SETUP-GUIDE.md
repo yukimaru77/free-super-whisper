@@ -174,6 +174,11 @@ that steals the user's focus. Real keystrokes only where noted.
 - Per-feature model tiers come from ~/.super-whisper/config.json
   (dictationModel / dictionaryModel; defaults instant / thinking→Medium),
   resolved in src/whisperConfig.ts; --model overrides per invocation.
+- Recording indicator: src/recordingIndicator.ts shows a floating red HUD
+  pill while dictation is live (native helper compiled once by swiftc into
+  ~/.super-whisper/bin/super-whisper-hud; notification fallback when no
+  Swift toolchain). It is killed on finish/cancel/error via indicator.pid
+  and self-exits after 15 min as a crash net.
 - Concurrency: hotkey presses that arrive while another voice command is
   running are DROPPED, not queued (toggle gives up on the lock after 1.5s).
   This matters: a queued toggle once fired as "finish" the instant a slow

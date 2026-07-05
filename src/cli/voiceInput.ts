@@ -25,6 +25,7 @@ import { getWhisperHomeDir } from "../whisperHome.js";
 import { VoiceTrace, setActiveVoiceTrace } from "../voiceObservability.js";
 import { loadWhisperConfig, resolveModelSetting } from "../whisperConfig.js";
 import { getDictionaryPath, getPromptsDir, loadExtractorPrompt } from "../whisperPrompts.js";
+import { hideRecordingIndicator, showRecordingIndicator } from "../recordingIndicator.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -127,6 +128,10 @@ export async function runVoiceInputCliCommand(
         model: result.state.desiredModelLabel,
         chromePort: result.state.chromePort,
       });
+      await showRecordingIndicator(
+        feedbackMode ? "🎙 修正を受付中 (Ctrl+Shift+Z)" : "🎙 音声受付中 (Ctrl+Z)",
+        logger,
+      );
       if (options.json) {
         console.log(JSON.stringify(result, null, 2));
         return;
@@ -143,6 +148,7 @@ export async function runVoiceInputCliCommand(
     }
 
     if (action === "finish") {
+      await hideRecordingIndicator();
       const timeoutMs = options.inputTimeout
         ? parseDuration(options.inputTimeout, 30_000)
         : undefined;
@@ -233,6 +239,7 @@ export async function runVoiceInputCliCommand(
       return;
     }
 
+    await hideRecordingIndicator();
     const result = await cancelBrowserVoiceInput({
       log: logger,
       statePath,
@@ -245,6 +252,7 @@ export async function runVoiceInputCliCommand(
     }
     console.log(chalk.bold("ChatGPT voice input cancelled"));
   } catch (error) {
+    await hideRecordingIndicator();
     trace.recordError(error);
     trace.finish("error");
     throw error;
@@ -422,6 +430,7 @@ export async function runVoiceSyncCommand(options: VoiceSyncCliOptions): Promise
     console.log(chalk.bold("Prompts and dictionary synced to ChatGPT."));
     console.log(`Edit ${getPromptsDir()}/*.md and ${getDictionaryPath()}, then re-run: super-whisper sync`);
   } catch (error) {
+    await hideRecordingIndicator();
     trace.recordError(error);
     trace.finish("error");
     throw error;
